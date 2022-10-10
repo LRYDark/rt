@@ -527,36 +527,39 @@ class PluginRtTicket extends CommonDBTM {
       global $DB;
       
       $item = $params['item'];
+      if (!is_object($item) || !method_exists($item, 'getType')) {
+         return;
+      }
+      
+         switch ($item->getType()) {
+            case 'TicketTask':
 
-      switch ($item->getType()) {
-         case 'TicketTask':
+               $task_id    = $item->getID();
+               $table      = self::getTable();
+               $result     = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $task_id")->fetch_object();
 
-            $task_id    = $item->getID();
-            $table      = self::getTable();
-            $result     = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $task_id")->fetch_object();
+               if(!empty($result->routetime)){
+                  $time = $result->routetime * 60;
+                  $Times = $result->routetime * 60;
+               }else{
+                  $time = 0;
+                  $Times = 0;
+               }
 
-            if(!empty($result->routetime)){
-               $time = $result->routetime * 60;
-               $Times = $result->routetime * 60;
-            }else{
-               $time = 0;
-               $Times = 0;
-            }
-
-            $time = str_replace(":", "h", gmdate("H:i",$time));          
-            $fa_icon = ($Times > 0 ? ' fa-car ' : '');
-            $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='actualtime_faclock_{$task_id}' class='fa{$fa_icon}'></i> $time </span>";
-            
-            if ($Times > 0) {
-               $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div[data-itemtype='TicketTask'][data-items-id='{$task_id}'] div.card-body div.timeline-header div.creator").append("{$icon}");
-                  });
-               JAVASCRIPT;
-               echo Html::scriptBlock($script);
-            }
-         break;
-      }      
+               $time = str_replace(":", "h", gmdate("H:i",$time));          
+               $fa_icon = ($Times > 0 ? ' fa-car ' : '');
+               $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='actualtime_faclock_{$task_id}' class='fa{$fa_icon}'></i> $time </span>";
+               
+               if ($Times > 0) {
+                  $script = <<<JAVASCRIPT
+                     $(document).ready(function() {
+                        $("div[data-itemtype='TicketTask'][data-items-id='{$task_id}'] div.card-body div.timeline-header div.creator").append("{$icon}");
+                     });
+                  JAVASCRIPT;
+                  echo Html::scriptBlock($script);
+               }
+            break;
+         }    
    }
 
    function rawSearchOptions() {
