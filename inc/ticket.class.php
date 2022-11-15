@@ -3,10 +3,11 @@
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
-   
+
 class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
+   public static $EntitieAddress = 0;
 
    static function getTypeName($nb = 0) {
       return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
@@ -560,35 +561,26 @@ class PluginRtTicket extends CommonDBTM {
                }
             break;
          }    
+   }
 
-         switch ($item->getType()) { // affichage de des informations adresse, ville etc de l'entité associée.
-            case 'Ticket':
+   static function postShowEntitieAddress($params){
+      global $DB, $EntitieAddress;
 
-               $ticketId   = $_GET['id'];
-               $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
-               
-               $icon2 = "<span class='entity-badge' style='margin-top:3px'> $result->comment <br> $result->address, $result->postcode, $result->town, $result->country. </span>";
-               
-               $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$icon2}");
-                  });
-               JAVASCRIPT;
-               echo Html::scriptBlock($script);
-            break;
-         }   
+      if($EntitieAddress == 0){
 
-         /*switch ($item->getType()) { // affichage timer.
-            case 'Ticket':
-               $icon3 = "test 123";
-               $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div.navigationheader.justify-content-sm-between").append("{$icon3}");
-                  });
-               JAVASCRIPT;
-               echo Html::scriptBlock($script);
-            break;
-         } */
+         $EntitieAddress = 1;
+         $ticketId   = $_GET['id'];
+         $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
+         
+         $icon2 = "<span class='entity-badge' style='margin-top:3px'> $result->comment <br> $result->address, $result->postcode, $result->town, $result->country. </span>";
+         
+         $script = <<<JAVASCRIPT
+            $(document).ready(function() {
+               $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$icon2}");
+            });
+         JAVASCRIPT;
+         echo Html::scriptBlock($script);
+      }
    }
 
    function rawSearchOptions() {
