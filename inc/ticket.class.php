@@ -549,7 +549,7 @@ class PluginRtTicket extends CommonDBTM {
                $time = str_replace(":", "h", gmdate("H:i",$time));          
                $fa_icon = ($Times > 0 ? ' fa-car ' : '');
                $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='actualtime_faclock_{$task_id}' class='fa{$fa_icon}'></i> $time </span>";
-               
+            
                if ($Times > 0) {
                   $script = <<<JAVASCRIPT
                      $(document).ready(function() {
@@ -560,6 +560,35 @@ class PluginRtTicket extends CommonDBTM {
                }
             break;
          }    
+
+         switch ($item->getType()) { // affichage de des informations adresse, ville etc de l'entité associée.
+            case 'Ticket':
+
+               $ticketId   = $_GET['id'];
+               $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
+               
+               $icon2 = "<span class='entity-badge' style='margin-top:3px'> $result->comment <br> $result->address, $result->postcode, $result->town, $result->country. </span>";
+               
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$icon2}");
+                  });
+               JAVASCRIPT;
+               echo Html::scriptBlock($script);
+            break;
+         }   
+
+         /*switch ($item->getType()) { // affichage timer.
+            case 'Ticket':
+               $icon3 = "test 123";
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.navigationheader.justify-content-sm-between").append("{$icon3}");
+                  });
+               JAVASCRIPT;
+               echo Html::scriptBlock($script);
+            break;
+         } */
    }
 
    function rawSearchOptions() {
