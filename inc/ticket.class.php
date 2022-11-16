@@ -8,7 +8,7 @@ class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
    public static $EntitieAddress = 0;
-
+   
    static function getTypeName($nb = 0) {
       return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
    }
@@ -525,7 +525,7 @@ class PluginRtTicket extends CommonDBTM {
    }
 
    static function postShowItem($params){
-      global $DB;
+      global $DB, $EntitieAddress, $text;
       
       $item = $params['item'];
       if (!is_object($item) || !method_exists($item, 'getType')) {
@@ -561,33 +561,36 @@ class PluginRtTicket extends CommonDBTM {
                }
             break;
          }    
-   }
 
-   static function postShowEntitieAddress($params){
-      global $DB, $EntitieAddress, $text;
-
-      if($EntitieAddress == 0){
-
-         $EntitieAddress = 1;
          $ticketId   = $_GET['id'];
-         $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
-         
-         $complement = ucfirst($result->comment);
-         $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
+         if($EntitieAddress == 0 && $ticketId != 0){
+            $EntitieAddress = 1;
+            $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
+            
+               $complement = $result->comment;
+               $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
+   
+               $address = $result->address.", ".$result->postcode.", ".$result->town.", ".$result->country.".";
+               $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address));
+   
+            $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $complement <br> $address </span>";
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
+                  });
+               JAVASCRIPT;
+            echo Html::scriptBlock($script);
 
-         $address = $result->address.", ".$result->postcode.", ".$result->town.", ".$result->country.".";
-         $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address));
-
-         //$icon2 = "<span class='entity-badge' style='margin-top:3px'> $result->comment <br> $result->address, $result->postcode, $result->town, $result->country. </span>";
-         $icon2 = "<span class='entity-badge' style='margin-top:3px'> $complement <br> $address </span>";
-
-         $script = <<<JAVASCRIPT
-            $(document).ready(function() {
-               $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$icon2}");
-            });
-         JAVASCRIPT;
-         echo Html::scriptBlock($script);
-      }
+            //---------------------------------------------------------------------------------------
+            /*$chrono = "test";
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$chrono}");
+                  });
+               JAVASCRIPT;
+            echo Html::scriptBlock($script);*/
+            //---------------------------------------------------------------------------------------
+         }
    }
 
    function rawSearchOptions() {
