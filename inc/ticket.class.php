@@ -564,7 +564,7 @@ class PluginRtTicket extends CommonDBTM {
    }
 
    static function postShowEntitieAddress($params){
-      global $DB, $EntitieAddress;
+      global $DB, $EntitieAddress, $text;
 
       if($EntitieAddress == 0){
 
@@ -572,8 +572,15 @@ class PluginRtTicket extends CommonDBTM {
          $ticketId   = $_GET['id'];
          $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
          
-         $icon2 = "<span class='entity-badge' style='margin-top:3px'> $result->comment <br> $result->address, $result->postcode, $result->town, $result->country. </span>";
-         
+         $complement = ucfirst($result->comment);
+         $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
+
+         $address = $result->address.", ".$result->postcode.", ".$result->town.", ".$result->country.".";
+         $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address));
+
+         //$icon2 = "<span class='entity-badge' style='margin-top:3px'> $result->comment <br> $result->address, $result->postcode, $result->town, $result->country. </span>";
+         $icon2 = "<span class='entity-badge' style='margin-top:3px'> $complement <br> $address </span>";
+
          $script = <<<JAVASCRIPT
             $(document).ready(function() {
                $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$icon2}");
