@@ -4,6 +4,38 @@ if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
+   /*?>
+      <script language="JavaScript">
+            var timerID = 0
+         function chrono(){
+            end = new Date()
+            diff = end - start
+            diff = new Date(diff)
+
+            var sec = diff.getSeconds()
+            var min = diff.getMinutes()
+            var hr = diff.getHours()-1
+
+            if (min < 10){
+               min = "0" + min
+            }
+            if (sec < 10){
+               sec = "0" + sec
+            }
+            document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
+            timerID = setTimeout("chrono()", 10)
+         }
+         function chronoStart(){
+            start = new Date()
+            chrono()
+         }
+      </script>
+         <body onload = "chronoStart()">
+         <span id="chronotime">0:00:00</span>
+   <?php*/
+
+   //------------------------------------------------------------------------------------------
+
 class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
@@ -525,8 +557,15 @@ class PluginRtTicket extends CommonDBTM {
    }
 
    static function postShowItem($params){
-      global $DB, $EntitieAddress, $text;
-      
+      global $DB, $EntitieAddress;
+
+      echo `<div class="modal fade" id="modal_actualtime" role="dialog">';
+      <div class="modal-dialog modal-lg">
+         <div id="modal_content" class="modal-content">
+         </div>
+      </div>
+   </div>`;
+
       $item = $params['item'];
       if (!is_object($item) || !method_exists($item, 'getType')) {
          return;
@@ -580,16 +619,6 @@ class PluginRtTicket extends CommonDBTM {
                   });
                JAVASCRIPT;
             echo Html::scriptBlock($script);
-
-            //---------------------------------------------------------------------------------------
-            /*$chrono = "test";
-               $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$chrono}");
-                  });
-               JAVASCRIPT;
-            echo Html::scriptBlock($script);*/
-            //---------------------------------------------------------------------------------------
          }
    }
 
