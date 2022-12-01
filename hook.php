@@ -2,7 +2,6 @@
 function plugin_rt_item_update($item)
 {
    PluginRtTicket::updateroutetime($item);
-
    $ticket_id = $item->input['items_id'];
 }
 

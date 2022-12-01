@@ -559,13 +559,6 @@ class PluginRtTicket extends CommonDBTM {
    static function postShowItem($params){
       global $DB, $EntitieAddress;
 
-      echo `<div class="modal fade" id="modal_actualtime" role="dialog">';
-      <div class="modal-dialog modal-lg">
-         <div id="modal_content" class="modal-content">
-         </div>
-      </div>
-   </div>`;
-
       $item = $params['item'];
       if (!is_object($item) || !method_exists($item, 'getType')) {
          return;
