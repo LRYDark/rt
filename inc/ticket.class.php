@@ -621,51 +621,54 @@ class PluginRtTicket extends CommonDBTM {
                JAVASCRIPT;
             echo Html::scriptBlock($script);
 
-            // timer
-            ?>
-            <style>
-               .TimerBadge {
-                  display: inline-flex;
-                  flex-wrap: wrap;
-                  justify-content: center;
-                  align-items: center;
-                  background: #fec95c;
-                  color: black;
-                  padding: calc(0.25rem - 1px) 0.25rem;
-                  border: 1px solid transparent;
-                  border-radius: 4px;
-                  font-size: 0.7rem;
-               }
-            </style>
-            <?php
-            $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
-               $script = <<<JAVASCRIPT
-                  function chrono(){
-                     end = new Date()
-                     diff = end - start
-                     diff = new Date(diff)
-            
-                     var sec = diff.getSeconds()
-                     var min = diff.getMinutes()
-                     var hr = diff.getHours()-1
-            
-                     if (min < 10){
-                        min = "0" + min
-                     }
-                     if (sec < 10){
-                        sec = "0" + sec
-                     }
-            
-                     document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
-                     timerID = setTimeout("chrono()", 10)
-                  }
+            $config = new PluginRtConfig();
 
-                  $(document).ready(function() {
-                     $("div.navigationheader.justify-content-sm-between").append("<span class='TimerBadge' id='chronotime'>0:00:00</span>");
-                     chrono();
-                  });
-               JAVASCRIPT;
-            echo Html::scriptBlock($script);
+            if($config->fields['showtimer'] == 1){// timer
+               ?>
+               <style>
+                  .TimerBadge {
+                     display: inline-flex;
+                     flex-wrap: wrap;
+                     justify-content: center;
+                     align-items: center;
+                     background: #fec95c;
+                     color: black;
+                     padding: calc(0.25rem - 1px) 0.25rem;
+                     border: 1px solid transparent;
+                     border-radius: 4px;
+                     font-size: 0.7rem;
+                  }
+               </style>
+               <?php
+               $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
+                  $script = <<<JAVASCRIPT
+                     function chrono(){
+                        end = new Date()
+                        diff = end - start
+                        diff = new Date(diff)
+               
+                        var sec = diff.getSeconds()
+                        var min = diff.getMinutes()
+                        var hr = diff.getHours()-1
+               
+                        if (min < 10){
+                           min = "0" + min
+                        }
+                        if (sec < 10){
+                           sec = "0" + sec
+                        }
+               
+                        document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
+                        timerID = setTimeout("chrono()", 10)
+                     }
+   
+                     $(document).ready(function() {
+                        $("div.navigationheader.justify-content-sm-between").append("<span class='TimerBadge' id='chronotime'>0:00:00</span>");
+                        chrono();
+                     });
+                  JAVASCRIPT;
+               echo Html::scriptBlock($script);
+            }
          }
    }
 

@@ -4,16 +4,10 @@ if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
-/**
- * Class PluginRtConfig
- */
 class PluginRtConfig extends CommonDBTM
 {
    static private $_instance = null;
 
-   /**
-    * PluginRtConfig constructor.
-    */
    function __construct()
    {
       global $DB;
@@ -38,14 +32,9 @@ class PluginRtConfig extends CommonDBTM
       return Session::haveRight('config', UPDATE);
    }
 
-   /**
-    * @param int $nb
-    *
-    * @return translated
-    */
    static function getTypeName($nb = 0)
    {
-      return __("Task timer configuration", "rt");
+      return __("configuration du chronomètre / temps de trajet ", "rt");
    }
 
    static function getInstance()
@@ -59,11 +48,6 @@ class PluginRtConfig extends CommonDBTM
       return self::$_instance;
    }
 
-   /**
-    * @param bool $update
-    *
-    * @return PluginRtConfig
-    */
    static function getConfig($update = false)
    {
       static $config = null;
@@ -76,7 +60,7 @@ class PluginRtConfig extends CommonDBTM
       return $config;
    }
 
-   static function showConfigForm()
+   static function showConfigForm() //formulaire de configuration du plugin
    {
       $rand = mt_rand();
 
@@ -108,23 +92,43 @@ class PluginRtConfig extends CommonDBTM
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Affichage et activation du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
+      echo "<td>" . __("Couleur de fond du chronomètre ", "rt") . "</td><td>";
       Dropdown::showYesNo('showColorTimer', $config->showColorTimer(), -1);
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Affichage et activation du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
+      echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
       Dropdown::showYesNo('showBackgroundTimer', $config->showBackgroundTimer(), -1);
       echo "</td>";
       echo "</tr>";
+
+      //-----------------------------------------------------------------------------------------
+
+      /*echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Affichage et activation du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
+      Dropdown::showYesNo('showtimer', $config->showTimer(), -1);
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Couleur de fond du chronomètre ", "rt") . "</td><td>";
+      Dropdown::showYesNo('showColorTimer', $config->showColorTimer(), -1);
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
+      Dropdown::showYesNo('showBackgroundTimer', $config->showBackgroundTimer(), -1);
+      echo "</td>";
+      echo "</tr>";*/
 
       $config->showFormButtons(['candel' => false]);
 
       return false;
    }
 
-   // return fonction 
+   // return fonction (retourn les values enregistrées en bdd)
    function showTimer()
    {
       return ($this->fields['showtimer'] ? true : false);
@@ -143,11 +147,10 @@ class PluginRtConfig extends CommonDBTM
    {
 
       if ($item->getType() == 'Config') {
-         return __("Chronomètre ", "rt");
+         return __("Chrono / Temps de trajet ", "rt");
       }
       return '';
    }
-
 
    static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
