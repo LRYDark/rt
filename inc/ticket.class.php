@@ -4,35 +4,42 @@ if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
-   /*?>
+   ?>
+      <!-- ---------- timer ---------- -->
       <script language="JavaScript">
-            var timerID = 0
-         function chrono(){
-            end = new Date()
-            diff = end - start
-            diff = new Date(diff)
+      var timerID = 0
+      function chrono(){
+         end = new Date()
+         diff = end - start
+         diff = new Date(diff)
+      
+         //var msec = diff.getMilliseconds()
+         var sec = diff.getSeconds()
+         var min = diff.getMinutes()
+         var hr = diff.getHours()-1
 
-            var sec = diff.getSeconds()
-            var min = diff.getMinutes()
-            var hr = diff.getHours()-1
+         if (min < 10){
+            min = "0" + min
+         }
+         if (sec < 10){
+            sec = "0" + sec
+         }
 
-            if (min < 10){
-               min = "0" + min
-            }
-            if (sec < 10){
-               sec = "0" + sec
-            }
-            document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
-            timerID = setTimeout("chrono()", 10)
-         }
-         function chronoStart(){
-            start = new Date()
-            chrono()
-         }
+         document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
+         timerID = setTimeout("chrono()", 10)
+
+      }
+      function chronoStart(){
+         start = new Date()
+         chrono()
+      }
       </script>
-         <body onload = "chronoStart()">
-         <span id="chronotime">0:00:00</span>
-   <?php*/
+      <body onload = "chronoStart()">
+      
+      <!-- ---------- timer ---------- -->
+   <?php
+      //echo '<span id="chronotime">0:00:00</span>';
+
 
    //------------------------------------------------------------------------------------------
 
@@ -40,6 +47,7 @@ class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
    public static $EntitieAddress = 0;
+   public static $timer = 0;
    
    static function getTypeName($nb = 0) {
       return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
@@ -609,6 +617,42 @@ class PluginRtTicket extends CommonDBTM {
                $script = <<<JAVASCRIPT
                   $(document).ready(function() {
                      $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
+                  });
+               JAVASCRIPT;
+            echo Html::scriptBlock($script);
+
+            $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
+               $script = <<<JAVASCRIPT
+                  function chrono(){
+                     end = new Date()
+                     diff = end - start
+                     diff = new Date(diff)
+                  
+                     //var msec = diff.getMilliseconds()
+                     var sec = diff.getSeconds()
+                     var min = diff.getMinutes()
+                     var hr = diff.getHours()-1
+            
+                     if (min < 10){
+                        min = "0" + min
+                     }
+                     if (sec < 10){
+                        sec = "0" + sec
+                     }
+            
+                     document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
+                     timerID = setTimeout("chrono()", 10)
+            
+                  }
+                  /*function chronoStart(){
+                     start = new Date()
+                     chrono()
+                  }*/
+
+                  $(document).ready(function() {
+                     $("div.navigationheader.justify-content-sm-between").append("<span class='entity-badge' id='chronotime'>0:00:00</span>");
+                     chrono();
+                     //chronoStart();
                   });
                JAVASCRIPT;
             echo Html::scriptBlock($script);
