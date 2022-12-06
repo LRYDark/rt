@@ -16,6 +16,10 @@ function plugin_init_rt() {
    if ($plugin->isActivated('rt')){
       Plugin::registerClass('PluginRtTicket', ['addtabon' => 'Ticket']);
 
+      $PLUGIN_HOOKS['config_page']['rt'] = 'front/config.form.php';
+      Plugin::registerClass('PluginRtConfig', ['addtabon' => 'Config']);
+      $config = new PluginRtConfig();
+
       $PLUGIN_HOOKS['post_item_form']['rt'] = ['PluginRtTicket','formroutetime'];
 
       $PLUGIN_HOOKS['item_add']['rt'] = [

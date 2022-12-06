@@ -589,7 +589,7 @@ class PluginRtTicket extends CommonDBTM {
 
                $time = str_replace(":", "h", gmdate("H:i",$time));          
                $fa_icon = ($Times > 0 ? ' fa-car ' : '');
-               $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='actualtime_faclock_{$task_id}' class='fa{$fa_icon}'></i> $time </span>";
+               $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='rt_faclock_{$task_id}' class='fa{$fa_icon}'></i> $time </span>";
             
                if ($Times > 0) {
                   $script = <<<JAVASCRIPT
@@ -622,6 +622,22 @@ class PluginRtTicket extends CommonDBTM {
             echo Html::scriptBlock($script);
 
             // timer
+            ?>
+            <style>
+               .TimerBadge {
+                  display: inline-flex;
+                  flex-wrap: wrap;
+                  justify-content: center;
+                  align-items: center;
+                  background: #fec95c;
+                  color: black;
+                  padding: calc(0.25rem - 1px) 0.25rem;
+                  border: 1px solid transparent;
+                  border-radius: 4px;
+                  font-size: 0.7rem;
+               }
+            </style>
+            <?php
             $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
                $script = <<<JAVASCRIPT
                   function chrono(){
@@ -645,7 +661,7 @@ class PluginRtTicket extends CommonDBTM {
                   }
 
                   $(document).ready(function() {
-                     $("div.navigationheader.justify-content-sm-between").append("<span class='entity-badge' id='chronotime'>0:00:00</span>");
+                     $("div.navigationheader.justify-content-sm-between").append("<span class='TimerBadge' id='chronotime'>0:00:00</span>");
                      chrono();
                   });
                JAVASCRIPT;
