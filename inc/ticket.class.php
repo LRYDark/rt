@@ -621,14 +621,14 @@ class PluginRtTicket extends CommonDBTM {
                JAVASCRIPT;
             echo Html::scriptBlock($script);
 
+            // timer
             $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
                $script = <<<JAVASCRIPT
                   function chrono(){
                      end = new Date()
                      diff = end - start
                      diff = new Date(diff)
-                  
-                     //var msec = diff.getMilliseconds()
+            
                      var sec = diff.getSeconds()
                      var min = diff.getMinutes()
                      var hr = diff.getHours()-1
@@ -642,17 +642,11 @@ class PluginRtTicket extends CommonDBTM {
             
                      document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
                      timerID = setTimeout("chrono()", 10)
-            
                   }
-                  /*function chronoStart(){
-                     start = new Date()
-                     chrono()
-                  }*/
 
                   $(document).ready(function() {
                      $("div.navigationheader.justify-content-sm-between").append("<span class='entity-badge' id='chronotime'>0:00:00</span>");
                      chrono();
-                     //chronoStart();
                   });
                JAVASCRIPT;
             echo Html::scriptBlock($script);
