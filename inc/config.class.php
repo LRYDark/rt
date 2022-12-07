@@ -87,8 +87,13 @@ class PluginRtConfig extends CommonDBTM
       echo "</td>";
       echo "</tr>";
 
-      $config->showFormButtons(['candel' => false]);
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Appliquée la configuration par défaut", "rt") . "</td><td>";
+      echo Html::submit('Defaut', ['value' => 'Defaut', 'class' => 'btn btn-info me-2']); // bouton / config par defaut
+      echo "</td>";
+      echo "</tr>";
 
+      $config->showFormButtons(['candel' => false]);
       return false;
    }
 

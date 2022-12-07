@@ -15,6 +15,20 @@ if (isset($_POST["update"])) {
    $config->update($_POST);
 
    Html::back();
+}else{
+  $config->check($_POST['id'], UPDATE);
+  $default = ['id'                     => 1,
+               'showtimer'             => 1,
+               'showColorTimer'        => '#000000',
+               'showBackgroundTimer'   => '#fec95c',
+             ];
+  if($config->update($default)){
+      Session::addMessageAfterRedirect(
+         __('Configuration par defaut appliquée', 'rp'),
+         true,
+         INFO
+      );
+  }
 }
 
 Html::redirect($CFG_GLPI["root_doc"] . "/front/config.form.php?forcetab=" . urlencode('PluginRtConfig$1'));
