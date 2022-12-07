@@ -4,16 +4,14 @@ if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
-   ?>
-      <!-- ---------- timer ---------- -->
+   ?><!-- ---------- timer ---------- -->
       <script language="JavaScript">
       var timerID = 0
       function chrono(){
          end = new Date()
          diff = end - start
          diff = new Date(diff)
-      
-         //var msec = diff.getMilliseconds()
+
          var sec = diff.getSeconds()
          var min = diff.getMinutes()
          var hr = diff.getHours()-1
@@ -35,14 +33,9 @@ if (!defined('GLPI_ROOT')) {
       }
       </script>
       <body onload = "chronoStart()">
-      
-      <!-- ---------- timer ---------- -->
-   <?php
-      //echo '<span id="chronotime">0:00:00</span>';
+   <!-- ---------- timer ---------- --><?php
 
-
-   //------------------------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------------------
 class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
@@ -643,29 +636,9 @@ class PluginRtTicket extends CommonDBTM {
                <?php
                $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
                   $script = <<<JAVASCRIPT
-                     function chrono(){
-                        end = new Date()
-                        diff = end - start
-                        diff = new Date(diff)
-               
-                        var sec = diff.getSeconds()
-                        var min = diff.getMinutes()
-                        var hr = diff.getHours()-1
-               
-                        if (min < 10){
-                           min = "0" + min
-                        }
-                        if (sec < 10){
-                           sec = "0" + sec
-                        }
-               
-                        document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
-                        timerID = setTimeout("chrono()", 10)
-                     }
-   
                      $(document).ready(function() {
                         $("div.navigationheader.justify-content-sm-between").append("<span class='TimerBadge' id='chronotime'>0:00:00</span>");
-                        chrono();
+                        chronoStart();
                      });
                   JAVASCRIPT;
                echo Html::scriptBlock($script);

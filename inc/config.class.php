@@ -147,10 +147,7 @@ class PluginRtConfig extends CommonDBTM
                       PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
-         $config->add([
-            'id' => 1,
-            'displayinfofor' => 0,
-         ]);
+         $config->add(['id' => 1,]);
       }
    }
 
