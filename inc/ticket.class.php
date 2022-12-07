@@ -47,7 +47,7 @@ class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
    public static $EntitieAddress = 0;
-   public static $timer = 0;
+   public static $timerOn = 0;
    
    static function getTypeName($nb = 0) {
       return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
@@ -565,7 +565,7 @@ class PluginRtTicket extends CommonDBTM {
    }
 
    static function postShowItem($params){
-      global $DB, $EntitieAddress;
+      global $DB, $EntitieAddress, $timerOn;
 
       $item = $params['item'];
       if (!is_object($item) || !method_exists($item, 'getType')) {
@@ -623,7 +623,8 @@ class PluginRtTicket extends CommonDBTM {
 
             $config = new PluginRtConfig();
 
-            if($config->fields['showtimer'] == 1){// timer
+            if($config->fields['showtimer'] == 1 && $timerOn == 0){// timer
+               $timerOn = 1;
                ?>
                <style>
                   .TimerBadge {
@@ -631,8 +632,8 @@ class PluginRtTicket extends CommonDBTM {
                      flex-wrap: wrap;
                      justify-content: center;
                      align-items: center;
-                     background: #fec95c;
-                     color: black;
+                     background: <?php echo $config->fields['showBackgroundTimer']; ?>;
+                     color: <?php echo $config->fields['showColorTimer']; ?>;
                      padding: calc(0.25rem - 1px) 0.25rem;
                      border: 1px solid transparent;
                      border-radius: 4px;

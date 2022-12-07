@@ -34,7 +34,7 @@ class PluginRtConfig extends CommonDBTM
 
    static function getTypeName($nb = 0)
    {
-      return __("configuration du chronomètre / temps de trajet ", "rt");
+      return __("Chrono / Temps de trajet ", "rt");
    }
 
    static function getInstance()
@@ -69,22 +69,6 @@ class PluginRtConfig extends CommonDBTM
 
       $config->showFormHeader(['colspan' => 4]);
 
-      /*$values = [
-         0 => __('In Standard interface only (default)', 'rt'),
-         1 => __('Both in Standard and Helpdesk interfaces', 'rt'),
-      ];
-      echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Enable timer on tasks", "rt") . "</td><td>";
-      Dropdown::showFromArray(
-         'displayinfofor',
-         $values,
-         [
-            'value' => $config->fields['displayinfofor']
-         ]
-      );
-      echo "</td>";
-      echo "</tr>";*/
-
       echo "<tr class='tab_bg_1'>";
       echo "<td>" . __("Affichage et activation du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
       Dropdown::showYesNo('showtimer', $config->showTimer(), -1);
@@ -92,36 +76,16 @@ class PluginRtConfig extends CommonDBTM
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Couleur de fond du chronomètre ", "rt") . "</td><td>";
-      Dropdown::showYesNo('showColorTimer', $config->showColorTimer(), -1);
-      echo "</td>";
-      echo "</tr>";
-
-      echo "<tr class='tab_bg_1'>";
       echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
-      Dropdown::showYesNo('showBackgroundTimer', $config->showBackgroundTimer(), -1);
-      echo "</td>";
-      echo "</tr>";
-
-      //-----------------------------------------------------------------------------------------
-
-      /*echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Affichage et activation du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
-      Dropdown::showYesNo('showtimer', $config->showTimer(), -1);
+      echo '<input type="color" name="showColorTimer" value="'.$config->showColorTimer().'">';
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Couleur de fond du chronomètre ", "rt") . "</td><td>";
-      Dropdown::showYesNo('showColorTimer', $config->showColorTimer(), -1);
+      echo "<td>" . __("Couleur de fond du chronomètre", "rt") . "</td><td>";
+      echo '<input type="color" name="showBackgroundTimer" value="'.$config->showBackgroundTimer().'">';
       echo "</td>";
       echo "</tr>";
-
-      echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
-      Dropdown::showYesNo('showBackgroundTimer', $config->showBackgroundTimer(), -1);
-      echo "</td>";
-      echo "</tr>";*/
 
       $config->showFormButtons(['candel' => false]);
 
@@ -135,11 +99,11 @@ class PluginRtConfig extends CommonDBTM
    }
    function showColorTimer()
    {
-      return ($this->fields['showColorTimer'] ? true : false);
+      return ($this->fields['showColorTimer']);
    }
    function showBackgroundTimer()
    {
-      return ($this->fields['showBackgroundTimer'] ? true : false);
+      return ($this->fields['showBackgroundTimer']);
    }
    // return fonction
 
@@ -177,10 +141,9 @@ class PluginRtConfig extends CommonDBTM
 
          $query = "CREATE TABLE IF NOT EXISTS $table (
                       `id` int {$default_key_sign} NOT NULL auto_increment,
-                      `displayinfofor` smallint NOT NULL DEFAULT '0',
                       `showtimer` TINYINT NOT NULL DEFAULT '1',
-                      `showColorTimer` TINYINT NOT NULL DEFAULT '1',
-                      `showBackgroundTimer` TINYINT NOT NULL DEFAULT '1',
+                      `showColorTimer` VARCHAR(255) NOT NULL DEFAULT '#000000',
+                      `showBackgroundTimer` VARCHAR(255) NOT NULL DEFAULT '#fec95c',
                       PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
@@ -188,14 +151,6 @@ class PluginRtConfig extends CommonDBTM
             'id' => 1,
             'displayinfofor' => 0,
          ]);
-      } else {
-         $migration->changeField($table, 'showtimer', 'showtimer', 'bool', ['value' => 1]);
-         $migration->changeField($table, 'showColorTimer', 'showColorTimer', 'bool', ['value' => 1]);
-         $migration->changeField($table, 'showBackgroundTimer', 'showBackgroundTimer', 'bool', ['value' => 1]);
-
-         $migration->dropField($table, 'autoopennew');
-
-         $migration->migrationOneTable($table);
       }
    }
 
