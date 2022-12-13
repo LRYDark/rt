@@ -27,12 +27,37 @@ if (!defined('GLPI_ROOT')) {
          timerID = setTimeout("chrono()", 10)
 
       }
+      /*function chronoStart(){
+         start = new Date()
+         chrono()
+      }*/
       function chronoStart(){
+         document.chronoForm.startstop.onclick = chronoStop
+         document.chronoForm.reset.onclick = chronoReset
          start = new Date()
          chrono()
       }
+      function chronoContinue(){
+         document.chronoForm.startstop.onclick = chronoStop
+         document.chronoForm.reset.onclick = chronoReset
+         start = new Date()-diff
+         start = new Date(start)
+         chrono()
+      }
+      function chronoReset(){
+         document.getElementById("chronotime").innerHTML = "0:00:00"
+         start = new Date()
+      }
+      function chronoStopReset(){
+         document.getElementById("chronotime").innerHTML = "0:00:00"
+         document.chronoForm.startstop.onclick = chronoStart
+      }
+      function chronoStop(){
+         document.chronoForm.startstop.onclick = chronoContinue
+         document.chronoForm.reset.onclick = chronoStopReset
+         clearTimeout(timerID)
+      }
       </script>
-      <body onload = "chronoStart()">
    <!-- ---------- timer ---------- --><?php
 
 //------------------------------------------------------------------------------------------
@@ -632,12 +657,18 @@ class PluginRtTicket extends CommonDBTM {
                      border-radius: 4px;
                      font-size: 0.7rem;
                   }
+                  .test{
+                     padding: 0;
+                     border: none;
+                     background: none;
+                  }
                </style>
                <?php
-               $timer = "<span class='entity-badge' id='chronotime'>0:00:00</span>";
+
+               $Chrono = "<form name='chronoForm'><input class='test fa-solid fa-play fa-pause' type='button' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input class='test fas fa-sync-alt' type='button' name='reset' value='&#xf2f1'/></form>";
                   $script = <<<JAVASCRIPT
                      $(document).ready(function() {
-                        $("div.navigationheader.justify-content-sm-between").append("<span class='TimerBadge' id='chronotime'>0:00:00</span>");
+                        $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='TimerBadge' id='chronotime'>0:00:00</span>{$Chrono}</div>");
                         chronoStart();
                      });
                   JAVASCRIPT;
