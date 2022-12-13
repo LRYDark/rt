@@ -70,10 +70,27 @@ class PluginRtConfig extends CommonDBTM
       $config->showFormHeader(['colspan' => 4]);
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Affichage et activation du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
+      echo "<td>" . __("Affichage du chronomètre dans le ticket", "rt") . "</td><td>";
       Dropdown::showYesNo('showtimer', $config->showTimer(), -1);
       echo "</td>";
       echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Activation automatique du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
+      Dropdown::showYesNo('showactivatetimer', $config->showactivatetimer(), -1);
+      if ($config->showactivatetimer() == 0){
+         echo ' Un bouton Play/Pause apparaitra pour lancé le chronomètre';
+      }
+      echo "</td>";
+      echo "</tr>";
+
+      if ($config->showactivatetimer() == -1){
+         echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Possibilité de mettre sur Play/Pause et remettre à zéro le chronomètre", "rt") . "</td><td>";
+         Dropdown::showYesNo('showPlayPauseButton', $config->showPlayPauseButton(), -1);
+         echo "</td>";
+         echo "</tr>";
+      }
 
       echo "<tr class='tab_bg_1'>";
       echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
@@ -84,6 +101,22 @@ class PluginRtConfig extends CommonDBTM
       echo "<tr class='tab_bg_1'>";
       echo "<td>" . __("Couleur de fond du chronomètre", "rt") . "</td><td>";
       echo '<input type="color" name="showBackgroundTimer" value="'.$config->showBackgroundTimer().'">';
+      echo "</td>";
+      echo "</tr>";
+
+      $values = [
+         0 => __('Blanc (default)','rt'),
+         1 => __('Noir','rt'),
+      ];
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Couleur des boutons Play/Pause", "rt") . "</td><td>";
+      Dropdown::showFromArray(
+         'showcolorbutton',
+         $values,
+         [
+            'value' => $config->fields['showcolorbutton']
+         ]
+      );
       echo "</td>";
       echo "</tr>";
 
@@ -110,6 +143,18 @@ class PluginRtConfig extends CommonDBTM
    {
       return ($this->fields['showBackgroundTimer']);
    }
+   function showactivatetimer()
+   {
+      return ($this->fields['showactivatetimer']);
+   }
+   function showPlayPauseButton()
+   {
+      return ($this->fields['showPlayPauseButton']);
+   }
+   /*function showInHelpdesk()
+   {
+      return ($this->fields['displayinfofor'] == 1);
+   }*/
    // return fonction
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
