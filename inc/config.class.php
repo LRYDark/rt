@@ -84,7 +84,7 @@ class PluginRtConfig extends CommonDBTM
       echo "</td>";
       echo "</tr>";
 
-      if ($config->showactivatetimer() == -1){
+      if ($config->showactivatetimer() == 1){
          echo "<tr class='tab_bg_1'>";
          echo "<td>" . __("Possibilité de mettre sur Play/Pause et remettre à zéro le chronomètre", "rt") . "</td><td>";
          Dropdown::showYesNo('showPlayPauseButton', $config->showPlayPauseButton(), -1);
@@ -145,16 +145,12 @@ class PluginRtConfig extends CommonDBTM
    }
    function showactivatetimer()
    {
-      return ($this->fields['showactivatetimer']);
+      return ($this->fields['showactivatetimer'] ? true : false);
    }
    function showPlayPauseButton()
    {
-      return ($this->fields['showPlayPauseButton']);
+      return ($this->fields['showPlayPauseButton'] ? true : false);
    }
-   /*function showInHelpdesk()
-   {
-      return ($this->fields['displayinfofor'] == 1);
-   }*/
    // return fonction
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
@@ -194,6 +190,9 @@ class PluginRtConfig extends CommonDBTM
                       `showtimer` TINYINT NOT NULL DEFAULT '1',
                       `showColorTimer` VARCHAR(255) NOT NULL DEFAULT '#000000',
                       `showBackgroundTimer` VARCHAR(255) NOT NULL DEFAULT '#fec95c',
+                      `showcolorbutton` TINYINT NOT NULL DEFAULT '0',
+                      `showactivatetimer` TINYINT NOT NULL DEFAULT '1',
+                      `showPlayPauseButton` TINYINT NOT NULL DEFAULT '1',
                       PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
