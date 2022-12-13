@@ -646,7 +646,7 @@ class PluginRtTicket extends CommonDBTM {
                ?>
                <style>
                   .TimerBadge {
-                     display: inline-flex;
+                     display: inline-block;
                      flex-wrap: wrap;
                      justify-content: center;
                      align-items: center;
@@ -657,18 +657,17 @@ class PluginRtTicket extends CommonDBTM {
                      border-radius: 4px;
                      font-size: 0.7rem;
                   }
-                  .test{
-                     padding: 0;
-                     border: none;
-                     background: none;
+                  .chrono{
+                     font-size: 12px;
+                     margin-right: 5px;
                   }
                </style>
                <?php
 
-               $Chrono = "<form name='chronoForm'><input class='test fa-solid fa-play fa-pause' type='button' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input class='test fas fa-sync-alt' type='button' name='reset' value='&#xf2f1'/></form>";
+               $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
                   $script = <<<JAVASCRIPT
                      $(document).ready(function() {
-                        $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='TimerBadge' id='chronotime'>0:00:00</span>{$Chrono}</div>");
+                        $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
                         chronoStart();
                      });
                   JAVASCRIPT;
