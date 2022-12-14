@@ -3,7 +3,7 @@
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
-
+$config = new PluginRtConfig();
    ?><!-- ---------- timer ---------- -->
       <script language="JavaScript">
       var timerID = 0
@@ -25,39 +25,48 @@ if (!defined('GLPI_ROOT')) {
 
          document.getElementById("chronotime").innerHTML = hr + ":" + min + ":" + sec
          timerID = setTimeout("chrono()", 10)
-
-      }
-      /*function chronoStart(){
-         start = new Date()
-         chrono()
-      }*/
-      function chronoStart(){
-         document.chronoForm.startstop.onclick = chronoStop
-         document.chronoForm.reset.onclick = chronoReset
-         start = new Date()
-         chrono()
-      }
-      function chronoContinue(){
-         document.chronoForm.startstop.onclick = chronoStop
-         document.chronoForm.reset.onclick = chronoReset
-         start = new Date()-diff
-         start = new Date(start)
-         chrono()
-      }
-      function chronoReset(){
-         document.getElementById("chronotime").innerHTML = "0:00:00"
-         start = new Date()
-      }
-      function chronoStopReset(){
-         document.getElementById("chronotime").innerHTML = "0:00:00"
-         document.chronoForm.startstop.onclick = chronoStart
-      }
-      function chronoStop(){
-         document.chronoForm.startstop.onclick = chronoContinue
-         document.chronoForm.reset.onclick = chronoStopReset
-         clearTimeout(timerID)
       }
       </script>
+
+      <?php if($config->fields['showPlayPauseButton'] == 0 && $config->fields['showactivatetimer'] == 1){ ?>
+         <script language="JavaScript">
+            function chronoStart(){
+               start = new Date()
+               chrono()
+            }
+         </script>
+      <?php } ?>
+
+      <?php if($config->fields['showPlayPauseButton'] == 1 || $config->fields['showactivatetimer'] == 0){ ?>
+         <script language="JavaScript">
+            function chronoStart(){
+               document.chronoForm.startstop.onclick = chronoStop
+               document.chronoForm.reset.onclick = chronoReset
+               start = new Date()
+               chrono()
+            }
+            function chronoContinue(){
+               document.chronoForm.startstop.onclick = chronoStop
+               document.chronoForm.reset.onclick = chronoReset
+               start = new Date()-diff
+               start = new Date(start)
+               chrono()
+            }
+            function chronoReset(){
+               document.getElementById("chronotime").innerHTML = "0:00:00"
+               start = new Date()
+            }
+            function chronoStopReset(){
+               document.getElementById("chronotime").innerHTML = "0:00:00"
+               document.chronoForm.startstop.onclick = chronoStart
+            }
+            function chronoStop(){
+               document.chronoForm.startstop.onclick = chronoContinue
+               document.chronoForm.reset.onclick = chronoStopReset
+               clearTimeout(timerID)
+            }
+         </script>
+      <?php } ?>
    <!-- ---------- timer ---------- --><?php
 
 //------------------------------------------------------------------------------------------
@@ -664,11 +673,15 @@ class PluginRtTicket extends CommonDBTM {
                </style>
                <?php
 
-               $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
+               if($config->fields['showPlayPauseButton'] == 1 || $config->fields['showactivatetimer'] == 0){
+                  $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
+               }
                   $script = <<<JAVASCRIPT
                      $(document).ready(function() {
                         $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
+                        
                         chronoStart();
+                        
                      });
                   JAVASCRIPT;
                echo Html::scriptBlock($script);
