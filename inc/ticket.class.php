@@ -674,17 +674,29 @@ class PluginRtTicket extends CommonDBTM {
                <?php
 
                if($config->fields['showPlayPauseButton'] == 1 || $config->fields['showactivatetimer'] == 0){
-                  $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
+                  if ($config->fields['showcolorbutton'] == 0){
+                     $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
+                  }else{
+                     $Chrono = "<form name='chronoForm'><input type='button' style='background-color: #262626; color: #f5f7fb; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: #262626; color: #f5f7fb; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
+                  }
                }
+
+               if($config->fields['showactivatetimer'] == 1){
                   $script = <<<JAVASCRIPT
                      $(document).ready(function() {
                         $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
-                        
-                        chronoStart();
-                        
+                           chronoStart();
                      });
                   JAVASCRIPT;
-               echo Html::scriptBlock($script);
+                  echo Html::scriptBlock($script);
+               }else{
+                  $script = <<<JAVASCRIPT
+                     $(document).ready(function() {
+                        $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
+                     });
+                  JAVASCRIPT;
+                  echo Html::scriptBlock($script);
+               }
             }
          }
    }
