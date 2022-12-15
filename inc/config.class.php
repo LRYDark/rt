@@ -123,11 +123,11 @@ class PluginRtConfig extends CommonDBTM
       echo "<td>" . __("Appliquée les couleurs par défaut", "rt") . "</td><td>";
       echo Html::submit('defaut', ['name' => 'default', 'value' => 'Defaut', 'class' => 'btn btn-info me-2']); // bouton / config par defaut
       echo "</td>";
-      echo "</tr>";*/
+      echo "</tr>";
 
       echo "<tr class='tab_bg_2 center'><td colspan='2'>";
-      echo Html::submit(_sx('button', 'Save'), ['name' => 'Save', 'class' => 'btn btn-info me-2']); // bouton save
-      echo "</td></tr>";
+      echo Html::submit(_sx('button', 'Save'), ['name' => 'update_config', 'class' => 'btn btn-primary']); // bouton save
+      echo "</td></tr>";*/
 
       $config->showFormButtons(['candel' => false]);
       return false;
