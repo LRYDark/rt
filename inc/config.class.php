@@ -103,21 +103,23 @@ class PluginRtConfig extends CommonDBTM
          echo "</td>";
       echo "</tr>";
 
-      $values = [
-         0 => __('Blanc (default)','rt'),
-         1 => __('Noir','rt'),
-      ];
-      echo "<tr class='tab_bg_1'>";
-         echo "<td>" . __("Couleur des boutons Play/Pause", "rt") . "</td><td>";
-            Dropdown::showFromArray(
-               'showcolorbutton',
-               $values,
-               [
-                  'value' => $config->fields['showcolorbutton']
-               ]
-            );
-         echo "</td>";
-      echo "</tr>";
+      if ($config->showactivatetimer() == 0 || $config->showPlayPauseButton() == 1){
+         $values = [
+            0 => __('Blanc (default)','rt'),
+            1 => __('Noir','rt'),
+         ];
+         echo "<tr class='tab_bg_1'>";
+            echo "<td>" . __("Couleur des boutons Play/Pause", "rt") . "</td><td>";
+               Dropdown::showFromArray(
+                  'showcolorbutton',
+                  $values,
+                  [
+                     'value' => $config->fields['showcolorbutton']
+                  ]
+               );
+            echo "</td>";
+         echo "</tr>";
+      }
 
       /*echo "<tr class='tab_bg_1'>";
       echo "<td>" . __("Appliquée les couleurs par défaut", "rt") . "</td><td>";
