@@ -187,7 +187,7 @@ class PluginRtConfig extends CommonDBTM
       $table = self::getTable();
       $config = new self();
       if ($DB->tableExists($table)) {
-         $query = "DROP TABLE glpi_plugin_rt_configs";
+         $query = "DROP TABLE $table";
          $DB->query($query) or die($DB->error());
       }
       if (!$DB->tableExists($table)) {
