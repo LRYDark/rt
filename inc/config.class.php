@@ -66,6 +66,7 @@ class PluginRtConfig extends CommonDBTM
       $config->getFromDB(1);
 
       $config->showFormHeader(['colspan' => 4]);
+      echo "<tr><th colspan='2'>" . __('Chronomètre', 'rp') . "</th></tr>";
 
       echo "<tr class='tab_bg_1'>";
          echo "<td>" . __("Affichage du chronomètre dans le ticket", "rt") . "</td><td>";
@@ -123,6 +124,10 @@ class PluginRtConfig extends CommonDBTM
       echo Html::submit('defaut', ['name' => 'default', 'value' => 'Defaut', 'class' => 'btn btn-info me-2']); // bouton / config par defaut
       echo "</td>";
       echo "</tr>";*/
+
+      echo "<tr class='tab_bg_2 center'><td colspan='2'>";
+      echo Html::submit(_sx('button', 'Save'), ['name' => 'Save', 'class' => 'btn btn-info me-2']); // bouton save
+      echo "</td></tr>";
 
       $config->showFormButtons(['candel' => false]);
       return false;
