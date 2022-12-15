@@ -62,46 +62,44 @@ class PluginRtConfig extends CommonDBTM
 
    static function showConfigForm() //formulaire de configuration du plugin
    {
-      $rand = mt_rand();
-
       $config = new self();
       $config->getFromDB(1);
 
       $config->showFormHeader(['colspan' => 4]);
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Affichage du chronomètre dans le ticket", "rt") . "</td><td>";
-      Dropdown::showYesNo('showtimer', $config->showTimer(), -1);
-      echo "</td>";
+         echo "<td>" . __("Affichage du chronomètre dans le ticket", "rt") . "</td><td>";
+            Dropdown::showYesNo('showtimer', $config->showTimer(), -1);
+         echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Activation automatique du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
-      Dropdown::showYesNo('showactivatetimer', $config->showactivatetimer(), -1);
-      if ($config->showactivatetimer() == 0){
-         echo ' Un bouton Play/Pause apparaitra pour lancé le chronomètre';
-      }
-      echo "</td>";
+         echo "<td>" . __("Activation automatique du chronomètre à l'ouverture du ticket", "rt") . "</td><td>";
+            Dropdown::showYesNo('showactivatetimer', $config->showactivatetimer(), -1);
+            if ($config->showactivatetimer() == 0){
+               echo ' Un bouton Play/Pause apparaitra pour lancé le chronomètre';
+            }
+         echo "</td>";
       echo "</tr>";
 
       if ($config->showactivatetimer() == 1){
          echo "<tr class='tab_bg_1'>";
-         echo "<td>" . __("Possibilité de mettre sur Play/Pause et remettre à zéro le chronomètre", "rt") . "</td><td>";
-         Dropdown::showYesNo('showPlayPauseButton', $config->showPlayPauseButton(), -1);
-         echo "</td>";
+            echo "<td>" . __("Possibilité de mettre sur Play/Pause et remettre à zéro le chronomètre", "rt") . "</td><td>";
+               Dropdown::showYesNo('showPlayPauseButton', $config->showPlayPauseButton(), -1);
+            echo "</td>";
          echo "</tr>";
       }
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
-      echo '<input type="color" name="showColorTimer" value="'.$config->showColorTimer().'">';
-      echo "</td>";
+         echo "<td>" . __("Couleur du text du chronomètre", "rt") . "</td><td>";
+            echo '<input type="color" name="showColorTimer" value="'.$config->showColorTimer().'">';
+         echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Couleur de fond du chronomètre", "rt") . "</td><td>";
-      echo '<input type="color" name="showBackgroundTimer" value="'.$config->showBackgroundTimer().'">';
-      echo "</td>";
+         echo "<td>" . __("Couleur de fond du chronomètre", "rt") . "</td><td>";
+            echo '<input type="color" name="showBackgroundTimer" value="'.$config->showBackgroundTimer().'">';
+         echo "</td>";
       echo "</tr>";
 
       $values = [
@@ -109,22 +107,22 @@ class PluginRtConfig extends CommonDBTM
          1 => __('Noir','rt'),
       ];
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Couleur des boutons Play/Pause", "rt") . "</td><td>";
-      Dropdown::showFromArray(
-         'showcolorbutton',
-         $values,
-         [
-            'value' => $config->fields['showcolorbutton']
-         ]
-      );
-      echo "</td>";
+         echo "<td>" . __("Couleur des boutons Play/Pause", "rt") . "</td><td>";
+            Dropdown::showFromArray(
+               'showcolorbutton',
+               $values,
+               [
+                  'value' => $config->fields['showcolorbutton']
+               ]
+            );
+         echo "</td>";
       echo "</tr>";
 
-      echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __("Appliquée la configuration par défaut", "rt") . "</td><td>";
-      echo Html::submit('Defaut', ['value' => 'Defaut', 'class' => 'btn btn-info me-2']); // bouton / config par defaut
+      /*echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Appliquée les couleurs par défaut", "rt") . "</td><td>";
+      echo Html::submit('defaut', ['name' => 'default', 'value' => 'Defaut', 'class' => 'btn btn-info me-2']); // bouton / config par defaut
       echo "</td>";
-      echo "</tr>";
+      echo "</tr>";*/
 
       $config->showFormButtons(['candel' => false]);
       return false;
@@ -186,14 +184,14 @@ class PluginRtConfig extends CommonDBTM
          $migration->displayMessage("Installing $table");
 
          $query = "CREATE TABLE IF NOT EXISTS $table (
-                      `id` int {$default_key_sign} NOT NULL auto_increment,
-                      `showtimer` TINYINT NOT NULL DEFAULT '1',
-                      `showColorTimer` VARCHAR(255) NOT NULL DEFAULT '#000000',
-                      `showBackgroundTimer` VARCHAR(255) NOT NULL DEFAULT '#fec95c',
-                      `showcolorbutton` TINYINT NOT NULL DEFAULT '0',
-                      `showactivatetimer` TINYINT NOT NULL DEFAULT '1',
-                      `showPlayPauseButton` TINYINT NOT NULL DEFAULT '1',
-                      PRIMARY KEY (`id`)
+                  `id` int {$default_key_sign} NOT NULL auto_increment,
+                  `showtimer` TINYINT NOT NULL DEFAULT '1',
+                  `showColorTimer` VARCHAR(255) NOT NULL DEFAULT '#000000',
+                  `showBackgroundTimer` VARCHAR(255) NOT NULL DEFAULT '#fec95c',
+                  `showcolorbutton` TINYINT NOT NULL DEFAULT '0',
+                  `showactivatetimer` TINYINT NOT NULL DEFAULT '1',
+                  `showPlayPauseButton` TINYINT NOT NULL DEFAULT '1',
+                  PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
          $config->add(['id' => 1,]);

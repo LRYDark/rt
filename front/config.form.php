@@ -13,14 +13,13 @@ $config = new PluginRtConfig();
 if (isset($_POST["update"])) {
    $config->check($_POST['id'], UPDATE);
    $config->update($_POST);
-
    Html::back();
-}else{
+}/*else(isset($_POST["defaut"])){
   $config->check($_POST['id'], UPDATE);
   $default = ['id'                     => 1,
-               'showtimer'             => 1,
                'showColorTimer'        => '#000000',
                'showBackgroundTimer'   => '#fec95c',
+               'showcolorbutton'       => 0,
              ];
   if($config->update($default)){
       Session::addMessageAfterRedirect(
@@ -29,6 +28,6 @@ if (isset($_POST["update"])) {
          INFO
       );
   }
-}
+}*/
 
 Html::redirect($CFG_GLPI["root_doc"] . "/front/config.form.php?forcetab=" . urlencode('PluginRtConfig$1'));
