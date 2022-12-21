@@ -73,7 +73,6 @@ $config = new PluginRtConfig();
 class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
-   public static $EntitieAddress = 0;
    public static $timerOn = 0;
    
    static function getTypeName($nb = 0) {
@@ -591,8 +590,8 @@ class PluginRtTicket extends CommonDBTM {
       }
    }
 
-   static function postShowItem($params){
-      global $DB, $EntitieAddress, $timerOn;
+   static function postShowItemRT($params){
+      global $DB, $timerOn;
 
       $item = $params['item'];
       if (!is_object($item) || !method_exists($item, 'getType')) {
@@ -601,7 +600,6 @@ class PluginRtTicket extends CommonDBTM {
       
          switch ($item->getType()) {
             case 'TicketTask':
-
                $task_id    = $item->getID();
                $table      = self::getTable();
                $result     = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $task_id")->fetch_object();
@@ -628,10 +626,18 @@ class PluginRtTicket extends CommonDBTM {
                }
             break;
          }    
+   }
+
+   static function postShowItemChrono($params){
+      global $DB, $timerOn;
+
+      $item = $params['item'];
+      /*if (!is_object($item) || !method_exists($item, 'getType')) {
+         return;
+      }*/
+   
 
          $ticketId   = $_GET['id'];
-         if($EntitieAddress == 0 && $ticketId != 0){
-            $EntitieAddress = 1;
             $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
             
                $complement = $result->comment;
@@ -650,53 +656,52 @@ class PluginRtTicket extends CommonDBTM {
 
             $config = new PluginRtConfig();
 
-            if($config->fields['showtimer'] == 1 && $timerOn == 0){// timer
-               $timerOn = 1;
-               ?>
-               <style>
-                  .TimerBadge {
-                     display: inline-block;
-                     flex-wrap: wrap;
-                     justify-content: center;
-                     align-items: center;
-                     background: <?php echo $config->fields['showBackgroundTimer']; ?>;
-                     color: <?php echo $config->fields['showColorTimer']; ?>;
-                     padding: calc(0.25rem - 1px) 0.25rem;
-                     border: 1px solid transparent;
-                     border-radius: 4px;
-                     font-size: 0.7rem;
-                  }
-                  .chrono{
-                     font-size: 12px;
-                     margin-right: 5px;
-                  }
-               </style>
-               <?php
-
-               if($config->fields['showPlayPauseButton'] == 1 || $config->fields['showactivatetimer'] == 0){
-                  if ($config->fields['showcolorbutton'] == 0){
-                     $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
-                  }else{
-                     $Chrono = "<form name='chronoForm'><input type='button' style='background-color: #262626; color: #f5f7fb; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: #262626; color: #f5f7fb; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
-                  }
+         if($config->fields['showtimer'] == 1 && $timerOn == 0){// timer
+            $timerOn = 1;
+            ?>
+            <style>
+               .TimerBadge {
+                  display: inline-block;
+                  flex-wrap: wrap;
+                  justify-content: center;
+                  align-items: center;
+                  background: <?php echo $config->fields['showBackgroundTimer']; ?>;
+                  color: <?php echo $config->fields['showColorTimer']; ?>;
+                  padding: calc(0.25rem - 1px) 0.25rem;
+                  border: 1px solid transparent;
+                  border-radius: 4px;
+                  font-size: 0.7rem;
                }
+               .chrono{
+                  font-size: 12px;
+                  margin-right: 5px;
+               }
+            </style>
+            <?php
 
-               if($config->fields['showactivatetimer'] == 1){
-                  $script = <<<JAVASCRIPT
-                     $(document).ready(function() {
-                        $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
-                           chronoStart();
-                     });
-                  JAVASCRIPT;
-                  echo Html::scriptBlock($script);
+            if($config->fields['showPlayPauseButton'] == 1 || $config->fields['showactivatetimer'] == 0){
+               if ($config->fields['showcolorbutton'] == 0){
+                  $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
                }else{
-                  $script = <<<JAVASCRIPT
-                     $(document).ready(function() {
-                        $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
-                     });
-                  JAVASCRIPT;
-                  echo Html::scriptBlock($script);
+                  $Chrono = "<form name='chronoForm'><input type='button' style='background-color: #262626; color: #f5f7fb; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: #262626; color: #f5f7fb; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
                }
+            }
+
+            if($config->fields['showactivatetimer'] == 1){
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
+                        chronoStart();
+                  });
+               JAVASCRIPT;
+               echo Html::scriptBlock($script);
+            }else{
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
+                  });
+               JAVASCRIPT;
+               echo Html::scriptBlock($script);
             }
          }
    }
