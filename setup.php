@@ -1,6 +1,6 @@
 <?php
 
-define('PLUGIN_RT_VERSION', '1.1.4');
+define('PLUGIN_RT_VERSION', '1.1.5');
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
@@ -30,7 +30,7 @@ function plugin_init_rt() {
       $PLUGIN_HOOKS['pre_item_update']['rt'] = ['TicketTask' => 'plugin_rt_item_update'];
       $PLUGIN_HOOKS['post_show_item']['rt'] = ['PluginRtTicket', 'postShowItemRT'];
 
-      $PLUGIN_HOOKS['post_show_tab']['rt'] = ['PluginRtTicket', 'postShowItemChrono'];
+      $PLUGIN_HOOKS['pre_item_form']['rt'] = ['PluginRtChrono', 'postShowItemChrono'];
    }
 }
 
