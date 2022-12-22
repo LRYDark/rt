@@ -73,6 +73,7 @@ $config = new PluginRtConfig();
 class PluginRtChrono extends CommonDBTM
 {
     static private $_instance = null;
+    public static $timerOn = 0;
 
     static function postShowItemChrono(){
         global $DB, $timerOn;

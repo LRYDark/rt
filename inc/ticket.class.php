@@ -9,7 +9,6 @@ class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
    public  static  $EntitieAddress = 0 ;
-   public static $timerOn = 0;
    
    static function getTypeName($nb = 0) {
       return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
