@@ -5,7 +5,7 @@ define('PLUGIN_RT_VERSION', '1.1.5');
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
 // Maximum GLPI version,
-define("PLUGIN_RT_MAX_GLPI", "10.0.6");
+define("PLUGIN_RT_MAX_GLPI", "10.0.9");
 
 function plugin_init_rt() {
    global $PLUGIN_HOOKS, $CFG_GLPI;
