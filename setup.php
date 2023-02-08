@@ -39,7 +39,6 @@ function plugin_version_rt() {
       'name'           => _n('Route Time', 'Route Time', 2, 'rt'),
       'version'        => PLUGIN_RT_VERSION,
       'author'         => 'REINERT Joris',
-      'license'        => 'GPLv3',
       'homepage'       => 'https://www.jcd-groupe.fr',
       'requirements'   => [
          'glpi' => [
