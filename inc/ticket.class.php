@@ -572,19 +572,29 @@ class PluginRtTicket extends CommonDBTM {
             $complement = $result->comment;
             $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
 
-            $address = $result->address.", ".$result->postcode.", ".$result->town.", ".$result->country.".";
-            $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address));
+            $address = "";
+            if (!empty($result->address))$address .= $result->address.", ";
+            if (!empty($result->postcode))$address .= $result->postcode.", ";
+            if (!empty($result->town))$address .= $result->town.", ";
+            if (!empty($result->country))$address .= $result->country.", ";
 
-         $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $complement <br> $address </span>";
-            $script = <<<JAVASCRIPT
-               $(document).ready(function() {
-                  $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
-               });
-            JAVASCRIPT;
-         echo Html::scriptBlock($script);
+            if (!empty($address)){
+               $address = substr($address,0,-2);          
+               $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address)).'.';
+            }
 
+         if (!empty($complement) || !empty($address)){
+            $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $complement <br> $address </span>";
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
+                  });
+               JAVASCRIPT;
+            echo Html::scriptBlock($script);
+         }
+        
          // Affichage du temps total du ticket
-            $result_total_hour_task   = $DB->query("SELECT SUM(actiontime) from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
+           /* $result_total_hour_task   = $DB->query("SELECT SUM(actiontime) from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
             //$result_total_hour_trajet = $DB->query("SELECT SUM(actiontime) from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
 
             $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $test </span>";
@@ -593,7 +603,7 @@ class PluginRtTicket extends CommonDBTM {
                      $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
                   });
                JAVASCRIPT;
-            echo Html::scriptBlock($script);
+            echo Html::scriptBlock($script);*/
       }
    }
 
