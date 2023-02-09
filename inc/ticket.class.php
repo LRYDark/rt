@@ -596,13 +596,16 @@ class PluginRtTicket extends CommonDBTM {
         
          // Affichage du temps total du ticket
             $result_total_hour_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
-            $result_total_hour_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
-
-            $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_hour_trajet->TotalTrajet*60)); 
             $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_hour_task->TotalTask)); 
+            
+            $result_total_hour_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
+            $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_hour_trajet->TotalTrajet*60)); 
 
-            $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $result_total_hour_trajet | $result_total_hour_task </span>";
-               $script = <<<JAVASCRIPT
+            $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_hour_task</td><td>$result_total_hour_trajet</td></tr></table>";
+
+            $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
+ 
+              $script = <<<JAVASCRIPT
                   $(document).ready(function() {
                      $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
                   });
