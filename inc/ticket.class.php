@@ -9,33 +9,40 @@ class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
    public  static  $EntitieAddress = 0 ;
-   
+
    static function getTypeName($nb = 0) {
       return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
    }
-
+   
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
-      $nb = self::countForItem($item);
-      switch ($item->getType()) {
-         case 'Ticket' :
-            if ($_SESSION['glpishow_count_on_tabs']) {
-               return self::createTabEntry(self::getTypeName($nb), $nb);
-            } else {
+      $config = new PluginRtConfig();
+      if ($config->fields['fromonglettrajet'] == 1){
+
+         $nb = self::countForItem($item);
+         switch ($item->getType()) {
+            case 'Ticket' :
+               if ($_SESSION['glpishow_count_on_tabs']) {
+                  return self::createTabEntry(self::getTypeName($nb), $nb);
+               } else {
+                  return self::getTypeName($nb);
+               }
+            default :
                return self::getTypeName($nb);
-            }
-         default :
-            return self::getTypeName($nb);
+         }
+         return '';
       }
-      return '';
    }
 
    static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0) {
-      switch ($item->getType()) {
-         case 'Ticket' :
-            self::showForTicket($item);
-            break;
+      $config = new PluginRtConfig();
+      if ($config->fields['fromonglettrajet'] == 1){
+         switch ($item->getType()) {
+            case 'Ticket' :
+               self::showForTicket($item);
+               break;
+         }
+         return true;
       }
-      return true;
    }
 
    /**
@@ -595,6 +602,8 @@ class PluginRtTicket extends CommonDBTM {
          }
         
          // Affichage du temps total du ticket
+         $config = new PluginRtConfig();
+         if ($config->fields['showtime'] == 1){
             $result_total_hour_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
             $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_hour_task->TotalTask)); 
             
@@ -604,13 +613,14 @@ class PluginRtTicket extends CommonDBTM {
             $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_hour_task</td><td>$result_total_hour_trajet</td></tr></table>";
 
             $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
- 
-              $script = <<<JAVASCRIPT
+
+            $script = <<<JAVASCRIPT
                   $(document).ready(function() {
                      $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
                   });
                JAVASCRIPT;
             echo Html::scriptBlock($script);
+         }
       }
    }
 

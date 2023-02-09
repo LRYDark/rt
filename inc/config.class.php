@@ -131,11 +131,31 @@ class PluginRtConfig extends CommonDBTM
       echo Html::submit(_sx('button', 'Save'), ['name' => 'update_config', 'class' => 'btn btn-primary']); // bouton save
       echo "</td></tr>";*/
 
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Affichage du recapitulatif des durées dans le ticket.", "rt") . "</td><td>";
+            Dropdown::showYesNo('showtime', $config->showTime(), -1);
+         echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Affichage de l'onglet temps de trajet dans le ticket.", "rt") . "</td><td>";
+            Dropdown::showYesNo('fromonglettrajet', $config->fromOngletTrajet(), -1);
+         echo "</td>";
+      echo "</tr>";
+
       $config->showFormButtons(['candel' => false]);
       return false;
    }
 
    // return fonction (retourn les values enregistrées en bdd)
+   function fromOngletTrajet()
+   {
+      return ($this->fields['fromonglettrajet'] ? true : false);
+   }
+   function showTime()
+   {
+      return ($this->fields['showtime'] ? true : false);
+   }
    function showTimer()
    {
       return ($this->fields['showtimer'] ? true : false);
@@ -202,6 +222,8 @@ class PluginRtConfig extends CommonDBTM
                   `showcolorbutton` TINYINT NOT NULL DEFAULT '0',
                   `showactivatetimer` TINYINT NOT NULL DEFAULT '1',
                   `showPlayPauseButton` TINYINT NOT NULL DEFAULT '1',
+                  `fromonglettrajet` TINYINT NOT NULL DEFAULT '1',
+                  `showtime` TINYINT NOT NULL DEFAULT '1',
                   PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
