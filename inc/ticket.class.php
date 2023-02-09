@@ -570,13 +570,14 @@ class PluginRtTicket extends CommonDBTM {
          $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
          
             $complement = $result->comment;
+            if (!empty($complement))$complement .= "<br>";
             $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
 
             $address = "";
-            if (!empty($result->address))$address .= $result->address.", ";
-            if (!empty($result->postcode))$address .= $result->postcode.", ";
-            if (!empty($result->town))$address .= $result->town.", ";
-            if (!empty($result->country))$address .= $result->country.", ";
+               if (!empty($result->address))$address .= $result->address.", ";
+               if (!empty($result->postcode))$address .= $result->postcode.", ";
+               if (!empty($result->town))$address .= $result->town.", ";
+               if (!empty($result->country))$address .= $result->country.", ";
 
             if (!empty($address)){
                $address = substr($address,0,-2);          
@@ -584,7 +585,7 @@ class PluginRtTicket extends CommonDBTM {
             }
 
          if (!empty($complement) || !empty($address)){
-            $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $complement <br> $address </span>";
+            $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $complement $address </span>";
                $script = <<<JAVASCRIPT
                   $(document).ready(function() {
                      $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
