@@ -605,10 +605,18 @@ class PluginRtTicket extends CommonDBTM {
          $config = new PluginRtConfig();
          if ($config->fields['showtime'] == 1){
             $result_total_hour_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
-            $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_hour_task->TotalTask)); 
+            if(!empty($result_total_hour_task->TotalTask)){
+               $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_hour_task->TotalTask)); 
+            }else{
+               $result_total_hour_task = '00h00';
+            }
             
             $result_total_hour_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
-            $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_hour_trajet->TotalTrajet*60)); 
+            if(!empty($result_total_hour_trajet->TotalTrajet)){
+               $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_hour_trajet->TotalTrajet*60)); 
+            }else{
+               $result_total_hour_trajet = '00h00';
+            }
 
             $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_hour_task</td><td>$result_total_hour_trajet</td></tr></table>";
 
