@@ -604,21 +604,26 @@ class PluginRtTicket extends CommonDBTM {
          // Affichage du temps total du ticket
          $config = new PluginRtConfig();
          if ($config->fields['showtime'] == 1){
-            $result_total_hour_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
-            if(!empty($result_total_hour_task->TotalTask)){
-               $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_hour_task->TotalTask)); 
+            $result_total_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
+            if(!empty($result_total_task->TotalTask)){
+               $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_task->TotalTask)); 
+               $result_total_min_task = $result_total_task->TotalTask/60;
+
+               $result_total_task = $result_total_hour_task .' | '. $result_total_min_task .' min';
             }else{
-               $result_total_hour_task = '00h00';
+               $result_total_task = 'Aucune durée';
             }
             
-            $result_total_hour_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
-            if(!empty($result_total_hour_trajet->TotalTrajet)){
-               $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_hour_trajet->TotalTrajet*60)); 
+            $result_total_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
+            if(!empty($result_total_trajet->TotalTrajet)){
+               $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_trajet->TotalTrajet*60)); 
+               $result_total_min_trajet = $result_total_trajet->TotalTrajet;
+               $result_total_trajet = $result_total_hour_trajet .' | '. $result_total_min_trajet .' min';
             }else{
-               $result_total_hour_trajet = '00h00';
+               $result_total_trajet = 'Aucune durée';
             }
 
-            $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_hour_task</td><td>$result_total_hour_trajet</td></tr></table>";
+            $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_task</td><td>$result_total_trajet</td></tr></table>";
 
             $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
 
