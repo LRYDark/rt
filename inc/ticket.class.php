@@ -375,7 +375,7 @@ class PluginRtTicket extends CommonDBTM {
       echo $out;
    }
 
-   static function updateroutetime(TicketTask $item){
+   static function updateroutetime(TicketTask $item){ // fonction de la mise à jour du temps de trajet 
       global $DB, $CFG_GLPI;
 
       $table      = self::getTable();
@@ -390,9 +390,9 @@ class PluginRtTicket extends CommonDBTM {
 
       $result = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
 
-      if ($item->input['routetime_quantity']/60 != 0){
+      //if ($item->input['routetime_quantity']/60 != 0){
          if (!$item->isNewItem()){
-            if(!empty($result->routetime)){
+            if(!empty($result->routetime) || $result->routetime == '0'){
                if($quantity != $result->routetime){
 
                   $OldTime = str_replace(":", "h", gmdate("H:i",$result->routetime*60));    
@@ -447,10 +447,10 @@ class PluginRtTicket extends CommonDBTM {
                }
             }
          }
-      }
+      //}
    }
 
-   static function addroutetime(CommonDBTM $item) {
+   static function addroutetime(CommonDBTM $item) { // fonction d'ajout du temps de trajet 
 
       global $CFG_GLPI,$DB;
 
