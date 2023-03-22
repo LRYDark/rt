@@ -548,16 +548,21 @@ class PluginRtTicket extends CommonDBTM {
             $result     = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $task_id")->fetch_object();
 
             if(!empty($result->routetime)){
-               $time = $result->routetime * 60;
-               $Times = $result->routetime * 60;
+               $time = $result->routetime;
+               $Times = $result->routetime;
             }else{
                $time = 0;
                $Times = 0;
             }
 
-            $time = str_replace(":", "h", gmdate("H:i",$time));          
+            //$time = str_replace(":", "h", gmdate("H:i",$time));
+         
+            $heures = floor($time / 60);
+            $minutes_restantes = $time % 60;
+            $total_route = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
+
             $fa_icon = ($Times > 0 ? ' fa-car ' : '');
-            $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='rt_faclock_{$task_id}' class='fa{$fa_icon}'></i> $time </span>";
+            $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='rt_faclock_{$task_id}' class='fa{$fa_icon}'></i> $total_route </span>";
          
             if ($Times > 0) {
                $script = <<<JAVASCRIPT
@@ -600,31 +605,37 @@ class PluginRtTicket extends CommonDBTM {
                JAVASCRIPT;
             echo Html::scriptBlock($script);
          }
-        
+         
          // Affichage du temps total du ticket
          $config = new PluginRtConfig();
          if ($config->fields['showtime'] == 1){
             $result_total_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
             if(!empty($result_total_task->TotalTask)){
-               $result_total_hour_task = str_replace(":", "h", gmdate("H:i",$result_total_task->TotalTask)); 
-               $result_total_min_task = $result_total_task->TotalTask/60;
 
+               $result_total_min_task = $result_total_task->TotalTask/60;
+               $heures = floor($result_total_min_task / 60);
+               $minutes_restantes = $result_total_min_task % 60;
+               $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
                $result_total_task = $result_total_hour_task .' | '. $result_total_min_task .' min';
+
             }else{
                $result_total_task = 'Aucune durée';
             }
             
             $result_total_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
             if(!empty($result_total_trajet->TotalTrajet)){
-               $result_total_hour_trajet = str_replace(":", "h", gmdate("H:i",$result_total_trajet->TotalTrajet*60)); 
+
                $result_total_min_trajet = $result_total_trajet->TotalTrajet;
-               $result_total_trajet = $result_total_hour_trajet .' | '. $result_total_min_trajet .' min';
+               $heures = floor($result_total_min_trajet / 60);
+               $minutes_restantes = $result_total_min_trajet % 60;
+               $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
+               $result_total_trajet = $result_total_hour_task .' | '. $result_total_min_trajet .' min';
+
             }else{
                $result_total_trajet = 'Aucune durée';
             }
 
             $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_task</td><td>$result_total_trajet</td></tr></table>";
-
             $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
 
             $script = <<<JAVASCRIPT
