@@ -579,7 +579,7 @@ class PluginRtTicket extends CommonDBTM {
       $ticketId   = $_GET['id'];
       if($EntitieAddress == 0 && $ticketId != 0){
          $EntitieAddress = 1;
-         $result     = $DB->query("SELECT address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
+         $result     = $DB->query("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
          
             $complement = $result->comment;
             if (!empty($complement))$complement .= "<br>";
@@ -597,7 +597,8 @@ class PluginRtTicket extends CommonDBTM {
             }
 
          if (!empty($complement) || !empty($address)){
-            $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $complement $address </span>";
+           $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
+           $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $value </span>";
                $script = <<<JAVASCRIPT
                   $(document).ready(function() {
                      $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
