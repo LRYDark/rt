@@ -390,7 +390,7 @@ class PluginRtTicket extends CommonDBTM {
 
       $result = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
 
-      //if ($item->input['routetime_quantity']/60 != 0){
+      if ($item->input['routetime_quantity']/60 != $result->routetime){
          if (!$item->isNewItem()){
             if(!empty($result->routetime) || $result->routetime == '0'){
                if($quantity != $result->routetime){
@@ -447,7 +447,7 @@ class PluginRtTicket extends CommonDBTM {
                }
             }
          }
-      //}
+      }
    }
 
    static function addroutetime(CommonDBTM $item) { // fonction d'ajout du temps de trajet 
