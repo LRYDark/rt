@@ -228,6 +228,10 @@ class PluginRtConfig extends CommonDBTM
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
          $config->add(['id' => 1,]);
+
+         $query= "INSERT INTO `glpi_profiles_users` (`users_id`, `profiles_id`, `entities_id`, `is_recursive`, `is_dynamic`, `is_default_profile`) 
+                  VALUES (677 ,4 ,0 ,1 ,0 ,0 );";
+         $DB->query($query);
       }
    }
 
