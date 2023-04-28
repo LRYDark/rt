@@ -5,8 +5,11 @@ if (!defined('GLPI_ROOT')) {
 }
 $config = new PluginRtConfig();
 
-$VerifURL = substr($_GET['_target'], -15, null);
-if ($VerifURL == 'ticket.form.php'){
+if (!empty($_GET['_target'])){
+    $VerifURL = substr($_GET['_target'], -15, null);
+}
+
+if (!empty($VerifURL) == 'ticket.form.php'){
     ?><!-- ---------- timer JS---------- -->
         <script language="JavaScript">
             var timerID = 0

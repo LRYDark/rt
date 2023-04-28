@@ -5,7 +5,7 @@ function plugin_rt_item_update($item)
    $ticket_id = $item->input['items_id'];
 }
 
-function plugin_rt_install() {
+function plugin_rt_install() { // fonction installation du plugin
 
    $migration = new Migration(PLUGIN_RT_VERSION);
 
@@ -25,7 +25,7 @@ function plugin_rt_install() {
    return true;
 }
 
-function plugin_rt_uninstall() {
+function plugin_rt_uninstall() { // fonction desintallation du plugin
 
    $migration = new Migration(PLUGIN_RT_VERSION);
 
