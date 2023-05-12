@@ -10,7 +10,7 @@ define("PLUGIN_RT_MAX_GLPI", "10.0.9");
 if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SESSION['glpiactiveprofile']['name'] == 'Super-Admin'){
    $_SESSION['alert_displayedRT'] = true;
    //token GitHub et identification du répertoire
-   $token = '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';
+   $token = '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';
    $owner = 'LRYDark';
    $repo = 'rt';
 
