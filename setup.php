@@ -1,10 +1,56 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.1.7'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.1.8'); // version du plugin
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
 // Maximum GLPI version,
 define("PLUGIN_RT_MAX_GLPI", "10.0.9");
+
+/****************************************************************************************************************************************** */
+if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SESSION['glpiactiveprofile']['name'] == 'Super-Admin'){
+   $_SESSION['alert_displayedRT'] = true;
+   //token GitHub et identification du répertoire
+   $token = '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';
+   $owner = 'LRYDark';
+   $repo = 'rt';
+
+   // Créez une fonction pour effectuer des requêtes à l'API GitHub
+   function requestGitHubAPIRT($url, $token) {
+      $ch = curl_init($url);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, [
+         'Authorization: token ' . $token,
+         'User-Agent: PHP-Script',
+         'Accept: application/vnd.github+json'
+      ]);
+      $response = curl_exec($ch);
+      curl_close($ch);
+      return json_decode($response, true);
+   }
+
+   // Récupérer la dernière version (release) disponible
+   function getLatestReleaseRT($owner, $repo, $token) {
+      $url = "https://api.github.com/repos/{$owner}/{$repo}/releases/latest";
+      return requestGitHubAPIRT($url, $token);
+   }
+
+   //$latestRelease = getLatestRelease($owner, $repo, $token);
+   $latestRelease = getLatestReleaseRT($owner, $repo, $token);
+
+   if(isset($latestRelease['tag_name'])){
+      $version = str_replace("rt-", "", $latestRelease['tag_name']);// Utilisation de str_replace pour retirer "rp-"
+
+      if ($version > PLUGIN_RT_VERSION){
+         // Afficher la pop-up avec JavaScript
+         echo "<script>
+            window.addEventListener('load', function() {
+               alert('Une nouvelle version du plugin rt est disponible (version : " . $latestRelease['tag_name'] . "). <br>Veuillez mettre à jour dès que possible.');
+            });
+         </script>";
+      }
+   }
+}
+/****************************************************************************************************************************************** */
 
 function plugin_init_rt() { // fonction glpi d'initialisation du plugin
    global $PLUGIN_HOOKS, $CFG_GLPI;
