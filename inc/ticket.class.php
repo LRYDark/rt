@@ -587,9 +587,11 @@ class PluginRtTicket extends CommonDBTM {
          $EntitieAddress = 1;
          $result     = $DB->query("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
          
-            $complement = $result->comment;
-            if (!empty($complement))$complement .= "<br>";
-            $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
+            if (!empty($result->comment))$complement = $result->comment;
+            if (!empty($complement)){
+               $complement .= "<br>";
+               $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
+            }
 
             $address = "";
                if (!empty($result->address))$address .= $result->address.", ";
