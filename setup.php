@@ -13,8 +13,8 @@ if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SE
    //token GitHub et identification du répertoire
    global $DB;
    $tokenID = $DB->query("SELECT token FROM `glpi_plugin_rt_configs` WHERE id = 1")->fetch_object();
-   $token = $tokenID->token;
    if (!empty($tokenID->token)){
+      $token = $tokenID->token;
       $owner = 'LRYDark';
       $repo = 'rt';
    
