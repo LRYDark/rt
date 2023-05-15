@@ -143,6 +143,12 @@ class PluginRtConfig extends CommonDBTM
          echo "</td>";
       echo "</tr>";
 
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Token GitHub.", "rt") . "</td><td>";
+            echo Html::input('token', ['value' => $config->showToken(), 'size' => 60, 'maxlength' => 80]);// bouton configuration du bas de page line 1
+         echo "</td>";
+      echo "</tr>";
+
       $config->showFormButtons(['candel' => false]);
       return false;
    }
@@ -175,6 +181,10 @@ class PluginRtConfig extends CommonDBTM
    function showPlayPauseButton()
    {
       return ($this->fields['showPlayPauseButton'] ? true : false);
+   }
+   function showToken()
+   {
+      return ($this->fields['token']);
    }
    // return fonction
 
@@ -224,6 +234,7 @@ class PluginRtConfig extends CommonDBTM
                   `showPlayPauseButton` TINYINT NOT NULL DEFAULT '1',
                   `fromonglettrajet` TINYINT NOT NULL DEFAULT '1',
                   `showtime` TINYINT NOT NULL DEFAULT '1',
+                  `token` VARCHAR(255) NULL,
                   PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
