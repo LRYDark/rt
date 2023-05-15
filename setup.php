@@ -1,5 +1,5 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.1.8'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.1.6'); // version du plugin
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
@@ -10,7 +10,7 @@ define("PLUGIN_RT_MAX_GLPI", "10.0.9");
 if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SESSION['glpiactiveprofile']['name'] == 'Super-Admin'){
    $_SESSION['alert_displayedRT'] = true;
    //token GitHub et identification du répertoire
-   $token = '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';
+   $token = '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';
    $owner = 'LRYDark';
    $repo = 'rt';
 
