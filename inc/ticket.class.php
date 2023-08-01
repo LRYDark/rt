@@ -657,6 +657,17 @@ class PluginRtTicket extends CommonDBTM {
             echo Html::scriptBlock($script);
          }
       }
+
+      if (empty($ticketId)){
+         $entitie = "<div class='d-grid gap-2 d-md-block'><a href='javascript:itemAction929322486('add');' class='btn btn-sm btn-outline-secondary' style='margin-right: 0px;'><i class='fas fa-plus'></i><span>Ajouter un demandeur</span></a></div>";
+         //affichage du tableau 
+         $script = <<<JAVASCRIPT
+               $(document).ready(function() {
+                  $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+               });
+            JAVASCRIPT;
+         echo Html::scriptBlock($script); 
+      }
    }
 
    function rawSearchOptions() {

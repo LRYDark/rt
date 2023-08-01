@@ -4,7 +4,7 @@ define('PLUGIN_RT_VERSION', '1.2.0'); // version du plugin
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
 // Maximum GLPI version,
-define("PLUGIN_RT_MAX_GLPI", "10.0.9");
+define("PLUGIN_RT_MAX_GLPI", "10.2.0");
 
 /****************************************************************************************************************************************** */
 if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SESSION['glpiactiveprofile']['name'] == 'Super-Admin'){
