@@ -64,6 +64,8 @@ function plugin_init_rt() { // fonction glpi d'initialisation du plugin
    $plugin = new Plugin();
 
    if ($plugin->isActivated('rt')){ // verification si le plugin rt est installé et activé
+      $PLUGIN_HOOKS['add_javascript']['rp'] = ['scripts/scripts-rt.js'];
+
       Plugin::registerClass('PluginRtTicket', ['addtabon' => 'Ticket']);
 
       $PLUGIN_HOOKS['config_page']['rt'] = 'front/config.form.php'; // initialisation de la page config

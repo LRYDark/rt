@@ -659,6 +659,10 @@ class PluginRtTicket extends CommonDBTM {
       }
 
       if (empty($ticketId)){
+
+         $params = ['job'        => 'test',
+                    'root_doc'   => PLUGIN_RT_WEBDIR];
+         echo Html::submit('test1', ['name'    => 'showCriForm','class'   => 'btn btn-primary', 'onclick' => "rt_loadCriForm(\"showCriForm\", \"test2\", " . json_encode($params) . ");"]);
          $entitie = "<div class='d-grid gap-2 d-md-block'><a href='javascript:itemAction929322486('add');' class='btn btn-sm btn-outline-secondary' style='margin-right: 0px;'><i class='fas fa-plus'></i><span>Ajouter un demandeur</span></a></div>";
          //affichage du tableau 
          $script = <<<JAVASCRIPT
