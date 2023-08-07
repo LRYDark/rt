@@ -6,6 +6,8 @@ define("PLUGIN_RT_MIN_GLPI", "10.0.3");
 // Maximum GLPI version,
 define("PLUGIN_RT_MAX_GLPI", "10.2.0");
 
+define("PLUGIN_RT_WEBDIR", Plugin::getWebDir("rt"));
+
 /****************************************************************************************************************************************** */
 if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SESSION['glpiactiveprofile']['name'] == 'Super-Admin'){
    $_SESSION['alert_displayedRT'] = true;
@@ -64,8 +66,6 @@ function plugin_init_rt() { // fonction glpi d'initialisation du plugin
    $plugin = new Plugin();
 
    if ($plugin->isActivated('rt')){ // verification si le plugin rt est installé et activé
-      $PLUGIN_HOOKS['add_javascript']['rp'] = ['scripts/scripts-rt.js'];
-
       Plugin::registerClass('PluginRtTicket', ['addtabon' => 'Ticket']);
 
       $PLUGIN_HOOKS['config_page']['rt'] = 'front/config.form.php'; // initialisation de la page config

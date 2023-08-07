@@ -26,7 +26,7 @@ class PluginRtCri extends CommonDBTM {
 
       $params = ['job'         => $ID,
                  'form'       => 'formReport',
-                 'root_doc'   => PLUGIN_RP_WEBDIR];
+                 'root_doc'   => PLUGIN_RT_WEBDIR];
 
     
                  echo 'test2';
