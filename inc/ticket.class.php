@@ -795,6 +795,8 @@ class PluginRtTicket extends CommonDBTM {
                   var entity_id = document.querySelector('[name="entities_id"]').value;
 
                   alert(lastname + " / " + firstname + " / " + mail + " / " + phone + " / " + entity_id);
+                  var query = "INSERT INTO glpi_users (NAME, realname, firstname, phone) VALUES ('RJ', 'Reinert', 'Joris', 0603905636)";  // Remplacez ceci par votre requête SQL
+                  executeSQL(query);
 
                   /*var xhr = new XMLHttpRequest();
                   xhr.open('POST', 'traitement.php', true);
@@ -809,6 +811,22 @@ class PluginRtTicket extends CommonDBTM {
                   };
                   xhr.send('champ1=' + champ1 + '&champ2=' + champ2);*/
                });
+
+               function executeSQL(query) {
+                  var xhr = new XMLHttpRequest();
+                  xhr.open("POST", "traitement.php", true);
+                  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                  xhr.onreadystatechange = function() {
+                     if (xhr.readyState == 4 && xhr.status == 200) {
+                           // Traitement de la réponse ici
+                           var response = xhr.responseText;
+                           console.log(response);
+                     }
+                  };
+                  xhr.send("query=" + query);
+
+                  alert(query);
+               }
          JAVASCRIPT;
          echo Html::scriptBlock($script); 
       }
