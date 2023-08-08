@@ -674,18 +674,118 @@ class PluginRtTicket extends CommonDBTM {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                </div>
                   <div class="modal-body">
-                     <?php
+                     <style> /*Style du modale et du tableau */
+                        .modal-dialog { 
+                           max-width: 700px; 
+                           margin: 1.75rem auto; 
+                        }
+                        .table td, .table td { 
+                           border: none !important;
+                        }
+                     </style>
+                     <?php echo "<form id='monFormulaire' method=\"post\" name=\"formReport\">";
+                        echo '<div class="table-responsive">';
+                           echo "<table class='table'>"; 
+
+                           // Entity
+                              echo "<tr id='bar'>";
+                                 echo "<td class='table-secondary'>";
+                                    echo '';
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                       echo "<label for='name'>entité de l'utilisateur</label><br>";
+                                       Dropdown::show('Entity', [
+                                          'name'   => 'entities_id',  // Nom du champ
+                                          'width'  => '100%',         // Largeur du menu déroulant. Ajustez selon vos besoins.
+                                       ]);
+                                       $entity_id = $_POST['entities_id'];
+
+                                       $script = <<<JAVASCRIPT
+                                          $(document).ready(function() {
+                                             $("#monFormulaire").submit(function(e) {
+                                                e.preventDefault(); // empêche le formulaire d'être soumis normalement
+                                                var formData = $(this).serialize(); // Récupère les données du formulaire
+                                          
+                                                $.ajax({
+                                                      type: "POST",
+                                                      url: "traitement.php",
+                                                      data: formData,
+                                                      success: function(data) {
+                                                         $("#resultat").html(data); // Affiche la réponse du serveur dans la div #resultat
+                                                      }
+                                                });
+                                             });
+                                          });
+                                       JAVASCRIPT;
+                                       
+                                    echo "</select>";
+                                 echo "</td>";
+                              echo "</tr>";
+
+                              // Nom / Prénom
+                              echo "<tr id='bar'>";
+                                 echo "<td class='table-secondary'>";
+                                    echo "";
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                       echo '<label for="nom">Nom de famille</label><br>';
+                                    echo '<input type="text" name="nom" placeholder="Nom" required>';
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                       echo '<label for="prenom">Prénom</label><br>';
+                                    echo '<input type="text" name="prenom" placeholder="Prénom" required>';
+                                 echo "</td>";
+                              echo "</tr>";
+
+                              // Téléphone / email
+                              echo "<tr>";
+                                 echo "<td class='table-secondary'>";
+                                    echo '';
+                                 echo "</td>"; 
+
+                                 echo "<td>";
+                                       echo '<label for="phone">Numéro de téléphone</label><br>';
+                                    echo '<input type="tel" id="phone" name="phone" placeholder="Téléphone">';
+                                 echo "</td>";
+ 
+                                 echo "<td>";
+                                       echo '<label for="email">Courriels</label><br>';
+                                    echo "<input type='mail' id='mail' name='email' required style='widtd: 850px;' placeholder='Courriels'>";
+                                 echo "</td>";
+                              echo "</tr>";
                      
-                     ?>
+                              //Bouton validation
+                              echo "<tr>";
+                                 echo "<td class='table-secondary'>";
+                                    echo '';
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                    echo "<input type='submit' name='add_cri' id='sig-submitBtn' value='Ajouter' class='submit'>";
+                                 echo "</td>";
+                              echo "</tr>";
+                           echo "</table>"; 
+                        echo "</div>";
+                     Html::closeForm(); ?>
+
+                     <form id="monFormulaire">
+                        <input type="text" name="nom" placeholder="Nom">
+                        <input type="submit" value="Envoyer">
+                     </form>
+                     
+                     <div id="resultat"></div>
                   </div>
                <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                  <button type="button" class="btn btn-primary">Sauvegarder</button>
                </div>
             </div>
          </div>
          </div>
       <?php
+
                
          $entitie = "<div class='d-grid gap-2 d-md-block'><button type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#exampleModal'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
          //affichage du tableau 
