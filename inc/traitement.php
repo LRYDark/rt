@@ -1,19 +1,15 @@
 <?php
-// Assurez-vous d'avoir configuré une connexion à la base de données ici
-// Par exemple: $conn = new mysqli($servername, $username, $password, $dbname);
+// Connexion à la base de données (ajustez selon votre configuration)
+$connection = new PDO('mysql:host=localhost;dbname=glpi', 'username', 'password');
 
-if (isset($_POST["nom"])) {
-    $nom = $_POST["nom"];
-    
-    // Protection contre les injections SQL
-    $stmt = $conn->prepare("SELECT * FROM ma_table WHERE nom = ?");
-    $stmt->bind_param("s", $nom); 
-    $stmt->execute();
-    $result = $stmt->get_result();
+$champ1 = $_POST['champ1'];
+$champ2 = $_POST['champ2'];
 
-    // Traitement des résultats
-    while ($row = $result->fetch_assoc()) {
-        echo "Nom: " . $row["nom"] . "<br>";
-    }
-}
+// Assurez-vous de traiter correctement les données reçues pour éviter les injections SQL
+$query = $connection->prepare("INSERT INTO votre_table (colonne1, colonne2) VALUES (:champ1, :champ2)");
+$query->bindParam(':champ1', $champ1);
+$query->bindParam(':champ2', $champ2);
+$query->execute();
+
+echo "Insertion réussie!";
 ?>

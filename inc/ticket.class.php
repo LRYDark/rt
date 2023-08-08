@@ -674,7 +674,7 @@ class PluginRtTicket extends CommonDBTM {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                </div>
                   <div class="modal-body">
-                     <style> /*Style du modale et du tableau */
+                     <style> /*Style du modal et du tableau */
                         .modal-dialog { 
                            max-width: 700px; 
                            margin: 1.75rem auto; 
@@ -683,8 +683,11 @@ class PluginRtTicket extends CommonDBTM {
                            border: none !important;
                         }
                      </style>
-                     <?php echo "<form id='monFormulaire' method=\"post\" name=\"formReport\">";
-                        echo '<div class="table-responsive">';
+                              <input type="text" id="champ1" />
+                              <input type="text" id="champ2" />
+
+                     <?php //echo "<form id='monFormulaire' method=\"post\" name=\"formReport\">";
+                        /*echo '<div class="table-responsive">';
                            echo "<table class='table'>"; 
 
                            // Entity
@@ -697,28 +700,10 @@ class PluginRtTicket extends CommonDBTM {
                                        echo "<label for='name'>entité de l'utilisateur</label><br>";
                                        Dropdown::show('Entity', [
                                           'name'   => 'entities_id',  // Nom du champ
+                                          'id'     => 'entity_id',  //ID de l'input
                                           'width'  => '100%',         // Largeur du menu déroulant. Ajustez selon vos besoins.
                                        ]);
-                                       $entity_id = $_POST['entities_id'];
-
-                                       $script = <<<JAVASCRIPT
-                                          $(document).ready(function() {
-                                             $("#monFormulaire").submit(function(e) {
-                                                e.preventDefault(); // empêche le formulaire d'être soumis normalement
-                                                var formData = $(this).serialize(); // Récupère les données du formulaire
-                                          
-                                                $.ajax({
-                                                      type: "POST",
-                                                      url: "traitement.php",
-                                                      data: formData,
-                                                      success: function(data) {
-                                                         $("#resultat").html(data); // Affiche la réponse du serveur dans la div #resultat
-                                                      }
-                                                });
-                                             });
-                                          });
-                                       JAVASCRIPT;
-                                       
+                                       //$entity_id = $_POST['entities_id'];                                      
                                     echo "</select>";
                                  echo "</td>";
                               echo "</tr>";
@@ -731,12 +716,12 @@ class PluginRtTicket extends CommonDBTM {
 
                                  echo "<td>";
                                        echo '<label for="nom">Nom de famille</label><br>';
-                                    echo '<input type="text" name="nom" placeholder="Nom" required>';
+                                    echo '<input id="nom" type="text" name="nom" placeholder="Nom" required>';
                                  echo "</td>";
 
                                  echo "<td>";
                                        echo '<label for="prenom">Prénom</label><br>';
-                                    echo '<input type="text" name="prenom" placeholder="Prénom" required>';
+                                    echo '<input id="prenom" type="text" name="prenom" placeholder="Prénom" required>';
                                  echo "</td>";
                               echo "</tr>";
 
@@ -757,7 +742,7 @@ class PluginRtTicket extends CommonDBTM {
                                  echo "</td>";
                               echo "</tr>";
                      
-                              //Bouton validation
+                           //Bouton validation
                               echo "<tr>";
                                  echo "<td class='table-secondary'>";
                                     echo '';
@@ -768,17 +753,12 @@ class PluginRtTicket extends CommonDBTM {
                                  echo "</td>";
                               echo "</tr>";
                            echo "</table>"; 
-                        echo "</div>";
-                     Html::closeForm(); ?>
-
-                     <form id="monFormulaire">
-                        <input type="text" name="nom" placeholder="Nom">
-                        <input type="submit" value="Envoyer">
-                     </form>
-                     
-                     <div id="resultat"></div>
+                        echo "</div>";*/
+                     //Html::closeForm(); ?>
                   </div>
                <div class="modal-footer">
+                  <button id="submit">Envoyer</button>
+                  <button type="button" class="btn btn-primary" id="submit">Ajouter</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                </div>
             </div>
@@ -786,14 +766,53 @@ class PluginRtTicket extends CommonDBTM {
          </div>
       <?php
 
-               
          $entitie = "<div class='d-grid gap-2 d-md-block'><button type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#exampleModal'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
-         //affichage du tableau 
          $script = <<<JAVASCRIPT
+
+            // Affichage du bouton ajouter un demandeur 
                $(document).ready(function() {
-                  $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+                     $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
                });
-            JAVASCRIPT;
+            //---------------------------------
+
+            //Action lors de l'ajout du demandeur
+               document.getElementById('submit').addEventListener('click', function() {
+
+                  alert("test");
+
+                  var champ1 = document.getElementById('champ1').value;
+                  var champ2 = document.getElementById('champ2').value;
+                  
+                  //var champ1 = document.getElementById('entity_id').value;
+                  //alert(champ1);
+                  /*var champ2 = document.getElementById('nom').value;
+                  alert(champ2);
+                  var champ3 = document.getElementById('prenom').value;
+                  alert(champ3);
+                  var champ4 = document.getElementById('phone').value;
+                  alert(champ4);
+                  var champ5 = document.getElementById('mail').value;
+                  alert(champ5);*/
+
+                  //alert( champ1 + " / " + champ2 + " / " + champ3 + " / " + champ4 + " / " + champ5); //test alert
+                  alert( champ1 + " / " + champ2); //test alert
+
+                  var xhr = new XMLHttpRequest();
+                  xhr.open('POST', 'traitement.php', true);
+                  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                  xhr.onreadystatechange = function() {
+                     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                           // Traitez la réponse ici (par exemple, affichez un message ou mettez à jour l'interface utilisateur)
+                           console.log(this.responseText);
+                           alert("Hello world2!");
+                     }
+                  };
+                  xhr.send('champ1=' + champ1 + '&champ2=' + champ2);
+               });
+            //---------------------------------
+               
+         JAVASCRIPT;
          echo Html::scriptBlock($script); 
       }
    }
