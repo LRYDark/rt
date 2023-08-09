@@ -694,9 +694,9 @@ class PluginRtTicket extends CommonDBTM {
                                        echo "<label for='name'>Entité de l'utilisateur</label><br>";
 
                                           Dropdown::show('Entity', [
-                                             'id' => 'test1',
-                                             'name' => 'entities_id',
+                                             'name' => 'add_user_for_entities_id',
                                              'width'  => '80%',
+                                             //'value' => $this->fields["entities_id"],
                                           ]);
 
                                           /* $querytask = "SELECT id, completename, name FROM glpi_entities ORDER BY id ASC;";
@@ -783,50 +783,34 @@ class PluginRtTicket extends CommonDBTM {
                $(document).ready(function() {
                      $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
                });
-            //---------------------------------
+            //--------------------------------------
 
             //Action lors de l'ajout du demandeur
                document.getElementById('submit').addEventListener('click', function() {
+
+                  var inputs = document.querySelectorAll('input');
+                  for (var i = 0; i < inputs.length; i++) {
+                     // Vérifie si l'input est vide ou ne contient que des espaces blancs
+                     if (!inputs[i].value.trim()) {
+                           alert('Veuillez remplir tous les champs!');
+                           e.preventDefault();  // empêche la soumission du formulaire
+                           return;  // sort de la fonction pour ne pas vérifier les autres inputs
+                     }
+                  }
                   
                   var lastname = document.getElementById('lastname').value;
                   var firstname = document.getElementById('firstname').value;
                   var mail = document.getElementById('mail').value;
                   var phone = document.getElementById('phone').value;
-                  var entity_id = document.querySelector('[name="entities_id"]').value;
+                  var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
+                  var entity_id = document.getElementById(id_element_select).value;
 
-                  alert(lastname + " / " + firstname + " / " + mail + " / " + phone + " / " + entity_id);
-                  var query = "INSERT INTO glpi_users (NAME, realname, firstname, phone) VALUES ('RJ', 'Reinert', 'Joris', 0603905636)";  // Remplacez ceci par votre requête SQL
-                  executeSQL(query);
+                  alert(lastname + " / " + firstname + " / " + mail + " / " + phone + " / " + id_element_select + " / " + entity_id);
 
-                  /*var xhr = new XMLHttpRequest();
-                  xhr.open('POST', 'traitement.php', true);
-                  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                  xhr.onreadystatechange = function() {
-                     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                           // Traitez la réponse ici (par exemple, affichez un message ou mettez à jour l'interface utilisateur)
-                           console.log(this.responseText);
-                           alert("Hello world2!");
-                     }
-                  };
-                  xhr.send('champ1=' + champ1 + '&champ2=' + champ2);*/
+                  //var query = "INSERT INTO glpi_users (NAME, realname, firstname, phone) VALUES ('RJ', 'Reinert', 'Joris', 0603905636)";  // Remplacez ceci par votre requête SQL
+                  //executeSQL(query);           
                });
-
-               function executeSQL(query) {
-                  var xhr = new XMLHttpRequest();
-                  xhr.open("POST", "traitement.php", true);
-                  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                  xhr.onreadystatechange = function() {
-                     if (xhr.readyState == 4 && xhr.status == 200) {
-                           // Traitement de la réponse ici
-                           var response = xhr.responseText;
-                           console.log(response);
-                     }
-                  };
-                  xhr.send("query=" + query);
-
-                  alert(query);
-               }
+            //--------------------------------------
          JAVASCRIPT;
          echo Html::scriptBlock($script); 
       }
