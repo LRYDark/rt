@@ -787,28 +787,15 @@ class PluginRtTicket extends CommonDBTM {
 
             //Action lors de l'ajout du demandeur
                document.getElementById('submit').addEventListener('click', function() {
-
-                  var inputs = document.querySelectorAll('input');
-                  for (var i = 0; i < inputs.length; i++) {
-                     // Vérifie si l'input est vide ou ne contient que des espaces blancs
-                     if (!inputs[i].value.trim()) {
-                           alert('Veuillez remplir tous les champs!');
-                           e.preventDefault();  // empêche la soumission du formulaire
-                           return;  // sort de la fonction pour ne pas vérifier les autres inputs
-                     }
-                  }
-                  
                   var lastname = document.getElementById('lastname').value;
                   var firstname = document.getElementById('firstname').value;
                   var mail = document.getElementById('mail').value;
                   var phone = document.getElementById('phone').value;
+
                   var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
-                  var entity_id = document.getElementById(id_element_select).value;
+                     var entity_id = document.getElementById(id_element_select).value;
 
-                  alert(lastname + " / " + firstname + " / " + mail + " / " + phone + " / " + id_element_select + " / " + entity_id);
-
-                  //var query = "INSERT INTO glpi_users (NAME, realname, firstname, phone) VALUES ('RJ', 'Reinert', 'Joris', 0603905636)";  // Remplacez ceci par votre requête SQL
-                  //executeSQL(query);           
+                  alert("Nom : " + lastname + " / Prénom : " + firstname + " / Mail : " + mail + " / Phone : " + phone + " / ID Entity : " + entity_id);          
                });
             //--------------------------------------
          JAVASCRIPT;
