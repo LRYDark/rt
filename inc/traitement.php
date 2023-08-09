@@ -2,6 +2,7 @@
 include ("../../../inc/includes.php");
 
 global $DB, $CFG_GLPI;
+$user      = new User();
 
     function cleanString($str) {
         // Supprimer les espaces
@@ -10,9 +11,10 @@ global $DB, $CFG_GLPI;
         $str = strtolower($str);
         // Supprimer les caractères non alphanumériques (vous pouvez ajuster l'expression régulière selon vos besoins)
         $str = preg_replace('/[^a-z0-9]/', '', $str);
+        $str =  'JCD'.$str.'123$';
         return $str;
     }
-
+    
 //if(isset($_POST['lastname']) && isset($_POST['firstname']) && isset($_POST['mail']) && isset($_POST['phone']) && isset($_POST['entity_id'])){
     $lastname = $_GET['lastname'];
     $firstname = $_GET['firstname'];
@@ -23,6 +25,12 @@ global $DB, $CFG_GLPI;
 
     $entities_name  = $DB->query("SELECT name from glpi_entities WHERE id = $entity_id")->fetch_object();
     $password = cleanString($entities_name->name);
+
+
+    $input = [
+
+    ];
+    $newID = $user->add($input)
 
     $query = "INSERT INTO glpi_users (name, password, realname, firstname, phone) VALUES ('$username', '$password','$lastname', '$firstname', $phone)";
     if(!$DB->query($query)){
