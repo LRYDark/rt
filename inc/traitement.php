@@ -18,7 +18,7 @@ $profile   = new Profile_User();
     }
 
 if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])){
-    echo json_encode("Les champs obligatoire ne peuvent pas étre vide");
+    echo json_encode("Les champs obligatoire ne peuvent pas être vide", JSON_UNESCAPED_UNICODE);
 
 }else{
     $lastname = $_GET['lastname'];
@@ -30,7 +30,7 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
     $username = strtolower($username);
 
     if (filter_var($mail, FILTER_VALIDATE_EMAIL) === FALSE) {
-        echo json_encode("Format du mail incorrect");
+        echo json_encode("Format du mail incorrect", JSON_UNESCAPED_UNICODE);
     }else{
         $entities_name  = $DB->query("SELECT name from glpi_entities WHERE id = $entity_id")->fetch_object();
         $password = password_hash(cleanString($entities_name->name), PASSWORD_DEFAULT);
@@ -45,7 +45,7 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
         if($UserId = $user->add($InputUser)){
                 $query = "UPDATE glpi_profiles_users SET entities_id = $entity_id, is_recursive = 1 WHERE users_id = $UserId";
             if(!$DB->query($query)){
-                echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error());
+                echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error(), JSON_UNESCAPED_UNICODE);
             }
     
                 $InputUserMail = [
@@ -53,13 +53,13 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
                     'users_id'   => $UserId,
                 ];
             if($usermail->add($InputUserMail)){
-                echo json_encode("Demandeur Ajoute");
+                echo json_encode("Demandeur Ajouté", JSON_UNESCAPED_UNICODE);
             }else{
-                echo json_encode("<b>Erreur lors de l'ajout du mail.");
+                echo json_encode("<b>Erreur lors de l'ajout du mail.", JSON_UNESCAPED_UNICODE);
             }
     
         }else{
-            echo json_encode("<b>Erreur lors de l'ajout du demandeur : Le demandeur est peut etre existant.");
+            echo json_encode("<b>Erreur lors de l'ajout du demandeur : Le demandeur est peut être existant.", JSON_UNESCAPED_UNICODE);
         }
     }   
 }

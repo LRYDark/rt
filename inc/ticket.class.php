@@ -779,6 +779,12 @@ class PluginRtTicket extends CommonDBTM {
 
          $entitie = "<div class='d-grid gap-2 d-md-block'><button type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#exampleModal'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
          $script = <<<JAVASCRIPT
+
+
+           /* $('#exampleModal').on('hidden.bs.modal', function () {
+               $(this).data('bs.modal', null);
+            });*/
+
             // Affichage du bouton ajouter un demandeur 
                $(document).ready(function() {
                      $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
@@ -799,9 +805,11 @@ class PluginRtTicket extends CommonDBTM {
                      type: "GET",
                      url: "http://localhost/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
                      success: function(rep){
+                        $('#exampleModal').modal('hide'); // Ferme le modal
                         alert(rep);
                      },
                      error: function(err){
+                        $('#exampleModal').modal('hide'); // Ferme le modal
                         alert(err);
                      }
                   }); 
