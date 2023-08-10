@@ -53,7 +53,7 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
                     'users_id'   => $UserId,
                 ];
             if($usermail->add($InputUserMail)){
-                echo json_encode("Demandeur Ajouté", JSON_UNESCAPED_UNICODE);
+                echo json_encode("Demandeur Ajouté avec succès", JSON_UNESCAPED_UNICODE);
             }else{
                 echo json_encode("<b>Erreur lors de l'ajout du mail.", JSON_UNESCAPED_UNICODE);
             }
