@@ -18,7 +18,7 @@ $profile   = new Profile_User();
     }
 
 if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])){
-    echo json_encode("Les champs obligatoire ne peuvent pas être vide", JSON_UNESCAPED_UNICODE);
+    echo json_encode("<b>Les champs obligatoire ne peuvent pas être vide", JSON_UNESCAPED_UNICODE);
 
 }else{
     $lastname = $_GET['lastname'];

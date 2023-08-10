@@ -691,31 +691,12 @@ class PluginRtTicket extends CommonDBTM {
                                  echo "</td>";
 
                                  echo "<td>";
-                                       echo "<label for='name'>Entité de l'utilisateur</label><br>";
-
+                                       echo "<label for='name'>Entité du demandeur</label><br>";
                                           Dropdown::show('Entity', [
                                              'name' => 'add_user_for_entities_id',
                                              'width'  => '80%',
-                                             //'value' => $this->fields["entities_id"],
-                                          ]);
 
-                                          /* $querytask = "SELECT id, completename, name FROM glpi_entities ORDER BY id ASC;";
-                                             $resulttask = $DB->query($querytask);
-                                             $name = array();
-                                    
-                                             while ($data = $DB->fetchArray($resulttask)) {
-                                                array_push($name, $data['name']);
-                                             }
-
-                                             Dropdown::showFromArray(
-                                                'entity',
-                                                $name,
-                                                [
-                                                   'value' => 0,
-                                                ]
-                                             ); */
-
-                                       //$entity_id = $_POST['entities_id'];                                      
+                                          ]);                                   
                                     echo "</select>";
                                  echo "</td>";
                               echo "</tr>";
@@ -779,12 +760,6 @@ class PluginRtTicket extends CommonDBTM {
 
          $entitie = "<div class='d-grid gap-2 d-md-block'><button type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#exampleModal'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
          $script = <<<JAVASCRIPT
-
-
-           /* $('#exampleModal').on('hidden.bs.modal', function () {
-               $(this).data('bs.modal', null);
-            });*/
-
             // Affichage du bouton ajouter un demandeur 
                $(document).ready(function() {
                      $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
@@ -801,7 +776,7 @@ class PluginRtTicket extends CommonDBTM {
                   var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                      var entity_id = document.getElementById(id_element_select).value;
 
-                  $.ajax({
+                  $.ajax({ // retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
                      type: "GET",
                      url: "http://localhost/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
                      success: function(rep){
