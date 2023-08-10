@@ -795,7 +795,6 @@ class PluginRtTicket extends CommonDBTM {
                   var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                      var entity_id = document.getElementById(id_element_select).value;
 
-                  //alert("Nom : " + lastname + " / Prénom : " + firstname + " / Mail : " + mail + " / Phone : " + phone + " / ID Entity : " + entity_id);      
                   $.ajax({
                      type: "GET",
                      url: "http://localhost/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
