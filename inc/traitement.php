@@ -16,8 +16,11 @@ $profile   = new Profile_User();
         $str =  'JCD'.$str.'123$';
         return $str;
     }
-    
-//if(isset($_POST['lastname']) && isset($_POST['firstname']) && isset($_POST['mail']) && isset($_POST['phone']) && isset($_POST['entity_id'])){
+
+if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])){
+    echo json_encode("Les champs obligatoire ne peuvent pas étre vide");
+
+}else{
     $lastname = $_GET['lastname'];
     $firstname = $_GET['firstname'];
     $mail = $_GET['mail'];
@@ -26,46 +29,40 @@ $profile   = new Profile_User();
     $username = $firstname.".".$lastname;
     $username = strtolower($username);
 
-    $entities_name  = $DB->query("SELECT name from glpi_entities WHERE id = $entity_id")->fetch_object();
-    $password = password_hash(cleanString($entities_name->name), PASSWORD_DEFAULT);
-
-        $InputUser = [
-            'name'          => $username,
-            'password'      => $password,
-            'realname'      => $lastname,
-            'firstname'     => $firstname,
-            'phone'         => $phone
-        ];
-    if($UserId = $user->add($InputUser)){
-            $query = "UPDATE glpi_profiles_users SET entities_id = $entity_id, is_recursive = 1 WHERE users_id = $UserId";
-        if(!$DB->query($query)){
-            echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error());
-        }
-
-            $InputUserMail = [
-                'email'     => $mail,
-                'users_id'   => $UserId,
-            ];
-        if($usermail->add($InputUserMail)){
-            echo json_encode("Demandeur Ajouté");
-        }else{
-            echo json_encode("<b>Erreur lors de l'ajout du mail : <br><br>" . $DB->error());
-        }
-
+    if (filter_var($mail, FILTER_VALIDATE_EMAIL) === FALSE) {
+        echo json_encode("Format du mail incorrect");
     }else{
-        echo json_encode("<b>Erreur lors de l'ajout du demandeur : <br><br>" . $DB->error());
-    }
+        $entities_name  = $DB->query("SELECT name from glpi_entities WHERE id = $entity_id")->fetch_object();
+        $password = password_hash(cleanString($entities_name->name), PASSWORD_DEFAULT);
     
-
-    /*$query = "INSERT INTO glpi_users (name, password, realname, firstname, phone) VALUES ('$username', '$password','$lastname', '$firstname', $phone)";
-    if(){
-        echo json_encode("<b>Erreur lors de l'ajout du demandeur : <br><br>" . $DB->error());
-    }*/
-
+            $InputUser = [
+                'name'          => $username,
+                'password'      => $password,
+                'realname'      => $lastname,
+                'firstname'     => $firstname,
+                'phone'         => $phone
+            ];
+        if($UserId = $user->add($InputUser)){
+                $query = "UPDATE glpi_profiles_users SET entities_id = $entity_id, is_recursive = 1 WHERE users_id = $UserId";
+            if(!$DB->query($query)){
+                echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error());
+            }
     
-
-//}
-
+                $InputUserMail = [
+                    'email'     => $mail,
+                    'users_id'   => $UserId,
+                ];
+            if($usermail->add($InputUserMail)){
+                echo json_encode("Demandeur Ajoute");
+            }else{
+                echo json_encode("<b>Erreur lors de l'ajout du mail.");
+            }
+    
+        }else{
+            echo json_encode("<b>Erreur lors de l'ajout du demandeur : Le demandeur est peut etre existant.");
+        }
+    }   
+}
 ?>
 
 

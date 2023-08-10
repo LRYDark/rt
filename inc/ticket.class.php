@@ -799,9 +799,9 @@ class PluginRtTicket extends CommonDBTM {
                   $.ajax({
                      type: "GET",
                      url: "http://localhost/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
-                     /*success: function(rep){
+                     success: function(rep){
                         alert(rep);
-                     },*/
+                     },
                      error: function(err){
                         alert(err);
                      }
