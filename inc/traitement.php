@@ -37,12 +37,8 @@ $profile   = new Profile_User();
             'phone'         => $phone
         ];
     if($UserId = $user->add($InputUser)){
-            $InputProfileUser = [
-                'users_id'      => $UserId,
-                'entities_id'   => $entity_id,
-                'is_recursive'  => 1
-            ];
-        if(!$profile->add($InputProfileUser)){
+            $query = "UPDATE glpi_profiles_users SET entities_id = $entity_id, is_recursive = 1 WHERE users_id = $UserId";
+        if(!$DB->query($query)){
             echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error());
         }
 
@@ -62,7 +58,7 @@ $profile   = new Profile_User();
     
 
     /*$query = "INSERT INTO glpi_users (name, password, realname, firstname, phone) VALUES ('$username', '$password','$lastname', '$firstname', $phone)";
-    if(!$DB->query($query)){
+    if(){
         echo json_encode("<b>Erreur lors de l'ajout du demandeur : <br><br>" . $DB->error());
     }*/
 
