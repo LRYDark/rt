@@ -3,6 +3,8 @@ include ("../../../inc/includes.php");
 
 global $DB, $CFG_GLPI;
 $user      = new User();
+$usermail  = new UserEmail();
+$profile   = new Profile_User();
 
     function cleanString($str) {
         // Supprimer les espaces
@@ -22,20 +24,47 @@ $user      = new User();
     $phone = $_GET['phone'];
     $entity_id = $_GET['entity_id'];
     $username = $firstname.".".$lastname;
+    $username = strtolower($username);
 
     $entities_name  = $DB->query("SELECT name from glpi_entities WHERE id = $entity_id")->fetch_object();
-    $password = cleanString($entities_name->name);
+    $password = password_hash(cleanString($entities_name->name), PASSWORD_DEFAULT);
 
+        $InputUser = [
+            'name'          => $username,
+            'password'      => $password,
+            'realname'      => $lastname,
+            'firstname'     => $firstname,
+            'phone'         => $phone
+        ];
+    if($UserId = $user->add($InputUser)){
+            $InputProfileUser = [
+                'users_id'      => $UserId,
+                'entities_id'   => $entity_id,
+                'is_recursive'  => 1
+            ];
+        if(!$profile->add($InputProfileUser)){
+            echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error());
+        }
 
-    $input = [
+            $InputUserMail = [
+                'email'     => $mail,
+                'users_id'   => $UserId,
+            ];
+        if($usermail->add($InputUserMail)){
+            echo json_encode("Demandeur Ajouté");
+        }else{
+            echo json_encode("<b>Erreur lors de l'ajout du mail : <br><br>" . $DB->error());
+        }
 
-    ];
-    $newID = $user->add($input)
-
-    $query = "INSERT INTO glpi_users (name, password, realname, firstname, phone) VALUES ('$username', '$password','$lastname', '$firstname', $phone)";
-    if(!$DB->query($query)){
+    }else{
         echo json_encode("<b>Erreur lors de l'ajout du demandeur : <br><br>" . $DB->error());
     }
+    
+
+    /*$query = "INSERT INTO glpi_users (name, password, realname, firstname, phone) VALUES ('$username', '$password','$lastname', '$firstname', $phone)";
+    if(!$DB->query($query)){
+        echo json_encode("<b>Erreur lors de l'ajout du demandeur : <br><br>" . $DB->error());
+    }*/
 
     
 
