@@ -768,6 +768,11 @@ class PluginRtTicket extends CommonDBTM {
 
             //Action lors de l'ajout du demandeur
                document.getElementById('submit').addEventListener('click', function() {
+
+                  var urlString = window.location.href; //URL de la page
+                  var url = new URL(urlString); // Création d'un objet URL
+                  var domain = url.origin; // Récupération du nom de domaine
+
                   var lastname = document.getElementById('lastname').value;
                   var firstname = document.getElementById('firstname').value;
                   var mail = document.getElementById('mail').value;
@@ -778,7 +783,7 @@ class PluginRtTicket extends CommonDBTM {
 
                   $.ajax({ // retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
                      type: "GET",
-                     url: "http://localhost/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                     url: domain + "/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
                      success: function(rep){
                         $('#exampleModal').modal('hide'); // Ferme le modal
                         alert(rep);
