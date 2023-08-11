@@ -783,7 +783,7 @@ class PluginRtTicket extends CommonDBTM {
 
                   $.ajax({ // retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
                      type: "GET",
-                     url: domain + "/glpi/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                     url: domain + "/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
                      success: function(rep){
                         $('#exampleModal').modal('hide'); // Ferme le modal
                         alert(rep);
