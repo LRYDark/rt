@@ -2,6 +2,9 @@
 include ("../../../inc/includes.php");
 
 global $DB, $CFG_GLPI;
+
+use Glpi\Event;
+
 $user      = new User();
 $usermail  = new UserEmail();
 $profile   = new Profile_User();
@@ -43,9 +46,24 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
                 'phone'         => $phone
             ];
         if($UserId = $user->add($InputUser)){
+                Event::log(
+                    $UserId,
+                    "users",
+                    4,
+                    "setup",
+                    sprintf(__('%1$s adds the item %2$s'), $_SESSION["glpiname"], $username)
+                );
                 $query = "UPDATE glpi_profiles_users SET entities_id = $entity_id, is_recursive = 1 WHERE users_id = $UserId";
             if(!$DB->query($query)){
                 echo json_encode("<b>Erreur lors de l'ajout de l'entité : <br><br>" . $DB->error(), JSON_UNESCAPED_UNICODE);
+            }else{
+                Event::log(
+                    $UserId,
+                    "users",
+                    5,
+                    "setup",
+                    sprintf(__('%s updates an item'), $_SESSION["glpiname"])
+                );
             }
     
                 $InputUserMail = [
@@ -55,7 +73,7 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
             if($usermail->add($InputUserMail)){
                 echo json_encode("Demandeur Ajouté avec succès", JSON_UNESCAPED_UNICODE);
             }else{
-                echo json_encode("<b>Erreur lors de l'ajout du mail.", JSON_UNESCAPED_UNICODE);
+                echo json_encode("<b>Erreur lors de l'ajout du mail du demandeur. Le demandeur a bien été ajouté sans son mail.", JSON_UNESCAPED_UNICODE);
             }
     
         }else{
