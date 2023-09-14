@@ -734,17 +734,7 @@ class PluginRtTicket extends CommonDBTM {
                                     echo "<input type='mail' id='mail' name='email' required style='widtd: 850px;' placeholder='Courriels'>";
                                  echo "</td>";
                               echo "</tr>";
-                     
-                           //Bouton validation
-                              /*echo "<tr>";
-                                 echo "<td class='table-secondary'>";
-                                    echo '';
-                                 echo "</td>";
-
-                                 echo "<td>";
-                                    echo "<input type='submit' name='add_cri' id='sig-submitBtn' value='Ajouter' class='submit'>";
-                                 echo "</td>";
-                              echo "</tr>";*/
+                              echo "<input id='url' name='url' type='hidden' value=".PLUGIN_RT_WEBDIR." />";
                            echo "</table>"; 
                         echo "</div>";
                      //Html::closeForm(); 
@@ -769,21 +759,18 @@ class PluginRtTicket extends CommonDBTM {
             //Action lors de l'ajout du demandeur
                document.getElementById('submit').addEventListener('click', function() {
 
-                  var urlString = window.location.href; //URL de la page
-                  var url = new URL(urlString); // Création d'un objet URL
-                  var domain = url.origin; // Récupération du nom de domaine
-
                   var lastname = document.getElementById('lastname').value;
                   var firstname = document.getElementById('firstname').value;
                   var mail = document.getElementById('mail').value;
                   var phone = document.getElementById('phone').value;
+                  var url = document.getElementById('url').value;
 
                   var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                      var entity_id = document.getElementById(id_element_select).value;
 
                   $.ajax({ // retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
                      type: "GET",
-                     url: domain + "/plugins/rt/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                     url: url + "/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
                      success: function(rep){
                         $('#exampleModal').modal('hide'); // Ferme le modal
                         alert(rep);
