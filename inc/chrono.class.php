@@ -5,6 +5,8 @@ if (!defined('GLPI_ROOT')) {
 }
 $config = new PluginRtConfig();
 
+echo $_GET['_target'];
+
 if (!empty($_GET['_target'])){
     $VerifURL = substr($_GET['_target'], -15, null); // recupération URL
 
