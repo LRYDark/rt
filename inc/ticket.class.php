@@ -658,17 +658,17 @@ class PluginRtTicket extends CommonDBTM {
          }
       }
 
-      if (empty($ticketId)){
+      //if (empty($ticketId)){ //permet d'afficher uniquement lors de la création de nouveau ticket
 
       /**
        * @param $title
       * @param $text
       */
-         echo'<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">';
+         echo'<div class="modal fade" id="AddUser" tabindex="-1" aria-labelledby="AddUserLabel" aria-hidden="true">';
          echo'<div class="modal-dialog">';
             echo'<div class="modal-content">';
                echo'<div class="modal-header">';
-                  echo"<h5 class='modal-title' id='exampleModalLabel'>Ajout d'un demandeur</h5>";
+                  echo"<h5 class='modal-title' id='AddUserLabel'>Ajout d'un demandeur</h5>";
                   echo'<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
                echo'</div>';
                   echo'<div class="modal-body">';
@@ -748,12 +748,22 @@ class PluginRtTicket extends CommonDBTM {
          echo '</div>';
          echo '</div>';
 
-         $entitie = "<div class='d-grid gap-2 d-md-block'><button type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#exampleModal'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
+         $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
          $script = <<<JAVASCRIPT
             // Affichage du bouton ajouter un demandeur 
-               $(document).ready(function() {
-                     $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
-               });
+            $(document).ready(function() {
+               // Vérifier si le bouton existe déjà
+               var boutonExist = document.getElementById('btnAjouterDemandeur');
+            
+               // Vérifier si l'élément existe
+               if (boutonExist === null) {
+                  console.log('Le bouton existe pas.');
+                  $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+               } else {
+                  // Le bouton existe déjà, ne faites rien
+                  console.log('Le bouton existe déjà.');
+               }
+            });
             //--------------------------------------
 
             //Action lors de l'ajout du demandeur
@@ -768,15 +778,15 @@ class PluginRtTicket extends CommonDBTM {
                   var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                      var entity_id = document.getElementById(id_element_select).value;
 
-                  $.ajax({ // retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
+                  $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
                      type: "GET",
-                     url: url + "/inc/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                     url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
                      success: function(rep){
-                        $('#exampleModal').modal('hide'); // Ferme le modal
+                        $('#AddUser').modal('hide'); // Ferme le modal
                         alert(rep);
                      },
                      error: function(err){
-                        $('#exampleModal').modal('hide'); // Ferme le modal
+                        $('#AddUser').modal('hide'); // Ferme le modal
                         alert(err);
                      }
                   }); 
@@ -784,7 +794,7 @@ class PluginRtTicket extends CommonDBTM {
             //--------------------------------------
          JAVASCRIPT;
          echo Html::scriptBlock($script);
-      }
+      //}
    }
 
    function rawSearchOptions() {

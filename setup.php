@@ -1,5 +1,5 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.3.2'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.3.3'); // version du plugin
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
