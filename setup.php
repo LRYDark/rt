@@ -81,8 +81,8 @@ function plugin_init_rt() { // fonction glpi d'initialisation du plugin
 
       $PLUGIN_HOOKS['pre_item_update']['rt'] = ['TicketTask' => 'plugin_rt_item_update']; // initialisation de la class
       $PLUGIN_HOOKS['post_show_item']['rt'] = ['PluginRtTicket', 'postShowItemNewTicketRT']; // initialisation de la class
-      $PLUGIN_HOOKS['show_in_timeline']['rt'] = ['PluginRtTicket', 'postShowItemNewTaskRT']; // initialisation de la class
-      $PLUGIN_HOOKS['pre_show_item']['rt'] = ['PluginRtChrono', 'postShowItemChrono']; // initialisation de la class   
+      $PLUGIN_HOOKS['pre_show_item']['rt'] = ['PluginRtTicket', 'postShowItemNewTaskRT']; // initialisation de la class
+      $PLUGIN_HOOKS['pre_item_form']['rt'] = ['PluginRtChrono', 'postShowItemChrono']; // initialisation de la class   
    }
 }
 
