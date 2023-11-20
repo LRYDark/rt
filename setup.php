@@ -1,5 +1,5 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.3.3'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.3.4'); // version du plugin
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
@@ -80,7 +80,8 @@ function plugin_init_rt() { // fonction glpi d'initialisation du plugin
       ];  // initialisation de la class addroutetime dans les tasks "suivi -> ITILFollowup | solution -> ITILSolution | tache -> TicketTask"
 
       $PLUGIN_HOOKS['pre_item_update']['rt'] = ['TicketTask' => 'plugin_rt_item_update']; // initialisation de la class
-      $PLUGIN_HOOKS['post_show_item']['rt'] = ['PluginRtTicket', 'postShowItemRT']; // initialisation de la class
+      $PLUGIN_HOOKS['post_show_item']['rt'] = ['PluginRtTicket', 'postShowItemNewTicketRT']; // initialisation de la class
+      $PLUGIN_HOOKS['show_in_timeline']['rt'] = ['PluginRtTicket', 'postShowItemNewTaskRT']; // initialisation de la class
       $PLUGIN_HOOKS['pre_show_item']['rt'] = ['PluginRtChrono', 'postShowItemChrono']; // initialisation de la class   
    }
 }

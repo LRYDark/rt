@@ -536,7 +536,7 @@ class PluginRtTicket extends CommonDBTM {
       }
    }
 
-   static function postShowItemRT($params){
+   static function postShowItemNewTicketRT($params){
       global $DB, $EntitieAddress, $timerOn;
 
       $item = $params['item'];
@@ -579,91 +579,10 @@ class PluginRtTicket extends CommonDBTM {
                echo Html::scriptBlock($script);
             }
          break;
-      }    
-
-      // Affichage des infos de l'entité.
-      $ticketId   = $_GET['id'];
-      if($EntitieAddress == 0 && $ticketId != 0){
-         $EntitieAddress = 1;
-         $result     = $DB->query("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
-         
-            if (!empty($result->comment))$complement = $result->comment;
-            if (!empty($complement)){
-               $complement .= "<br>";
-               $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
-            }
-
-            $address = "";
-               if (!empty($result->address))$address .= $result->address.", ";
-               if (!empty($result->postcode))$address .= $result->postcode.", ";
-               if (!empty($result->town))$address .= $result->town.", ";
-               if (!empty($result->country))$address .= $result->country.", ";
-
-            if (!empty($address)){
-               $address = substr($address,0,-2);          
-               $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address)).'.';
-            }
-
-            // verification des variables + affichage des infos de l'entité avec création d'un liens de recherche, filtré en fonction de l'entité.
-         if (!empty($complement) || !empty($address)){
-           $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
-           $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $value </span>";
-               $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
-                  });
-               JAVASCRIPT;
-            echo Html::scriptBlock($script);
-         }
-         
-         // Affichage du temps total du ticket
-         $config = new PluginRtConfig();
-         if ($config->fields['showtime'] == 1){
-            $result_total_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
-            if(!empty($result_total_task->TotalTask)){ // recupération du temps total des taches
-
-               $result_total_min_task = $result_total_task->TotalTask/60;
-               $heures = floor($result_total_min_task / 60);
-               $minutes_restantes = $result_total_min_task % 60;
-               $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
-               $result_total_task = $result_total_hour_task .' | '. $result_total_min_task .' min';
-
-            }else{
-               $result_total_task = 'Aucune durée';
-            }
-            
-            $result_total_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
-            if(!empty($result_total_trajet->TotalTrajet)){// recupération du temps total des trajet
-
-               $result_total_min_trajet = $result_total_trajet->TotalTrajet;
-               $heures = floor($result_total_min_trajet / 60);
-               $minutes_restantes = $result_total_min_trajet % 60;
-               $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
-               $result_total_trajet = $result_total_hour_task .' | '. $result_total_min_trajet .' min';
-
-            }else{
-               $result_total_trajet = 'Aucune durée';
-            }
-
-            $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_task</td><td>$result_total_trajet</td></tr></table>";
-            $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
-
-            //affichage du tableau 
-            $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
-                  });
-               JAVASCRIPT;
-            echo Html::scriptBlock($script);
-         }
-      }
-
-      //if (empty($ticketId)){ //permet d'afficher uniquement lors de la création de nouveau ticket
-
-      /**
-       * @param $title
-      * @param $text
-      */
+      }  
+      
+      $ticketId = $_GET['id'];
+      if(empty($ticketId)){
          echo'<div class="modal fade" id="AddUser" tabindex="-1" aria-labelledby="AddUserLabel" aria-hidden="true">';
          echo'<div class="modal-dialog">';
             echo'<div class="modal-content">';
@@ -695,7 +614,6 @@ class PluginRtTicket extends CommonDBTM {
                                           Dropdown::show('Entity', [
                                              'name' => 'add_user_for_entities_id',
                                              'width'  => '80%',
-
                                           ]);                                   
                                     echo "</select>";
                                  echo "</td>";
@@ -794,7 +712,225 @@ class PluginRtTicket extends CommonDBTM {
             //--------------------------------------
          JAVASCRIPT;
          echo Html::scriptBlock($script);
-      //}
+      }
+   }
+
+   static function postShowItemNewTaskRT($params){
+      global $DB, $EntitieAddress, $timerOn;
+
+      // Affichage des infos de l'entité.
+      $ticketId   = $_GET['id'];
+      if($EntitieAddress == 0 && $ticketId != 0){
+         $EntitieAddress = 1;
+
+         $result = $DB->query("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
+
+            $complement = "";
+               if (!empty($result->comment))$complement = $result->comment;
+               if (!empty($complement)){
+                  $complement .= "<br>";
+                  $complement = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$complement));
+               }
+
+            $address = "";
+               if (!empty($result->address))$address .= $result->address.", ";
+               if (!empty($result->postcode))$address .= $result->postcode.", ";
+               if (!empty($result->town))$address .= $result->town.", ";
+               if (!empty($result->country))$address .= $result->country.", ";
+
+            if (!empty($address)){
+               $address = substr($address,0,-2);          
+               $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address)).'.';
+            }
+
+            // verification des variables + affichage des infos de l'entité avec création d'un liens de recherche, filtré en fonction de l'entité.
+         if (!empty($complement) || !empty($address)){
+           $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
+           $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $value </span>";
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
+                  });
+               JAVASCRIPT;
+            echo Html::scriptBlock($script);
+         }
+         
+         // Affichage du temps total du ticket
+         $config = new PluginRtConfig();
+         if ($config->fields['showtime'] == 1){
+            $result_total_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
+            if(!empty($result_total_task->TotalTask)){ // recupération du temps total des taches
+
+               $result_total_min_task = $result_total_task->TotalTask/60;
+               $heures = floor($result_total_min_task / 60);
+               $minutes_restantes = $result_total_min_task % 60;
+               $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
+               $result_total_task = $result_total_hour_task .' | '. $result_total_min_task .' min';
+
+            }else{
+               $result_total_task = 'Aucune durée';
+            }
+            
+            $result_total_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
+            if(!empty($result_total_trajet->TotalTrajet)){// recupération du temps total des trajet
+
+               $result_total_min_trajet = $result_total_trajet->TotalTrajet;
+               $heures = floor($result_total_min_trajet / 60);
+               $minutes_restantes = $result_total_min_trajet % 60;
+               $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
+               $result_total_trajet = $result_total_hour_task .' | '. $result_total_min_trajet .' min';
+
+            }else{
+               $result_total_trajet = 'Aucune durée';
+            }
+
+            $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_task</td><td>$result_total_trajet</td></tr></table>";
+            $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
+
+            //affichage du tableau 
+            $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
+                  });
+               JAVASCRIPT;
+            echo Html::scriptBlock($script);
+         }
+      }
+
+      /**
+       * @param $title
+       * @param $text
+      */
+         echo'<div class="modal fade" id="AddUser" tabindex="-1" aria-labelledby="AddUserLabel" aria-hidden="true">';
+         echo'<div class="modal-dialog">';
+            echo'<div class="modal-content">';
+               echo'<div class="modal-header">';
+                  echo"<h5 class='modal-title' id='AddUserLabel'>Ajout d'un demandeur$result->id</h5>";
+                  echo'<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+               echo'</div>';
+                  echo'<div class="modal-body">';
+                  ?><style> /*Style du modale et du tableau */
+                        .modal-dialog { 
+                           max-width: 700px; 
+                           margin: 1.75rem auto; 
+                        }
+                        .table td, .table td { 
+                           border: none !important;
+                        }
+                  </style><?php 
+                     //echo "<form id='monFormulaire' method=\"post\" name=\"formReport\">";
+                        echo '<div class="table-responsive">';
+                           echo "<table class='table'>"; 
+                           // Entity
+                              echo "<tr id='bar'>";
+                                 echo "<td class='table-secondary'>";
+                                    echo '';
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                       echo "<label for='name'>Entité du demandeur</label><br>";
+                                          Dropdown::show('Entity', [
+                                             'name' => 'add_user_for_entities_id',
+                                             'width'  => '80%',
+                                             'id' => 1,
+                                          ]);                                   
+                                    echo "</select>";
+                                 echo "</td>";
+                              echo "</tr>";
+
+                           // Nom / Prénom
+                              echo "<tr id='bar'>";
+                                 echo "<td class='table-secondary'>";
+                                    echo "";
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                       echo '<label for="nom">Nom de famille</label><br>';
+                                    echo '<input type="text" id="lastname" name="nom" placeholder="Nom" required>';
+                                 echo "</td>";
+
+                                 echo "<td>";
+                                       echo '<label for="prenom">Prénom</label><br>';
+                                    echo '<input type="text" id="firstname" name="prenom" placeholder="Prénom" required>';
+                                 echo "</td>";
+                              echo "</tr>";
+
+                           // Téléphone / email
+                              echo "<tr>";
+                                 echo "<td class='table-secondary'>";
+                                    echo '';
+                                 echo "</td>"; 
+
+                                 echo "<td>";
+                                       echo '<label for="phone">Numéro de téléphone</label><br>';
+                                    echo '<input type="tel" id="phone" name="phone" placeholder="Téléphone">';
+                                 echo "</td>";
+ 
+                                 echo "<td>";
+                                       echo '<label for="email">Courriels</label><br>';
+                                    echo "<input type='mail' id='mail' name='email' required style='widtd: 850px;' placeholder='Courriels'>";
+                                 echo "</td>";
+                              echo "</tr>";
+                              echo "<input id='url' name='url' type='hidden' value=".PLUGIN_RT_WEBDIR." />";
+                           echo "</table>"; 
+                        echo "</div>";
+                     //Html::closeForm(); 
+                     echo '<div id="resultat"></div>';
+                  echo '</div>';
+               echo '<div class="modal-footer">';
+                  echo '<button id="submit" class="btn btn-primary">Envoyer</button>';
+                  echo '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>';
+               echo '</div>';
+            echo '</div>';
+         echo '</div>';
+         echo '</div>';
+
+         $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
+         $script = <<<JAVASCRIPT
+            // Affichage du bouton ajouter un demandeur 
+            $(document).ready(function() {
+               // Vérifier si le bouton existe déjà
+               var boutonExist = document.getElementById('btnAjouterDemandeur');
+            
+               // Vérifier si l'élément existe
+               if (boutonExist === null) {
+                  console.log('Le bouton existe pas.');
+                  $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+               } else {
+                  // Le bouton existe déjà, ne faites rien
+                  console.log('Le bouton existe déjà.');
+               }
+            });
+            //--------------------------------------
+
+            //Action lors de l'ajout du demandeur
+               document.getElementById('submit').addEventListener('click', function() {
+
+                  var lastname = document.getElementById('lastname').value;
+                  var firstname = document.getElementById('firstname').value;
+                  var mail = document.getElementById('mail').value;
+                  var phone = document.getElementById('phone').value;
+                  var url = document.getElementById('url').value;
+
+                  var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
+                     var entity_id = document.getElementById(id_element_select).value;
+
+                  $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
+                     type: "GET",
+                     url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                     success: function(rep){
+                        $('#AddUser').modal('hide'); // Ferme le modal
+                        alert(rep);
+                     },
+                     error: function(err){
+                        $('#AddUser').modal('hide'); // Ferme le modal
+                        alert(err);
+                     }
+                  }); 
+               });
+            //--------------------------------------
+         JAVASCRIPT;
+         echo Html::scriptBlock($script);
    }
 
    function rawSearchOptions() {
