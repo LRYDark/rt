@@ -720,7 +720,7 @@ class PluginRtTicket extends CommonDBTM {
 
       // Affichage des infos de l'entité.
       $ticketId   = $_GET['id'];
-      if($EntitieAddress == 0 && $ticketId != 0){
+      if($EntitieAddress == 0 && $ticketId != 0 && !empty($ticketId)){
          $EntitieAddress = 1;
 
          $result = $DB->query("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
