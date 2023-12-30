@@ -63,7 +63,13 @@ function plugin_init_rt() { // fonction glpi d'initialisation du plugin
    global $PLUGIN_HOOKS, $CFG_GLPI;
 
    $PLUGIN_HOOKS['csrf_compliant']['rt'] = true;
+   $PLUGIN_HOOKS['change_profile']['rt'] = ['PluginRtProfile', 'initProfile'];
+
    $plugin = new Plugin();
+
+   if (Session::getLoginUserID()) {
+      Plugin::registerClass('PluginRtProfile', ['addtabon' => 'Profile']);
+   }
 
    if ($plugin->isActivated('rt')){ // verification si le plugin rt est installé et activé
       Plugin::registerClass('PluginRtTicket', ['addtabon' => 'Ticket']);
