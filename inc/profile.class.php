@@ -65,6 +65,11 @@ class PluginRtProfile extends Profile {
          'rights'   => [READ    => __('Read')]
          ],
          ['itemtype' => 'PluginRtConfig',
+         'label'    => __('Affichage du chronomètre', 'rt'),
+         'field'    => 'plugin_rt_chrono',
+         'rights'   => [READ    => __('Read')]
+         ],
+         ['itemtype' => 'PluginRtConfig',
          'label'    => __('Ajout de demandeur', 'rt'),
          'field'    => 'plugin_rt_add',
          'rights'   => [CREATE  => __('Create')]
@@ -144,6 +149,7 @@ class PluginRtProfile extends Profile {
    static function createFirstAccess($profiles_id) {
       self::addDefaultProfileInfos($profiles_id,
                                    ['plugin_rt_rt'             => ALLSTANDARDRIGHT,
+                                    'plugin_rt_chrono'         => ALLSTANDARDRIGHT,
                                     'plugin_rt_affichage'      => ALLSTANDARDRIGHT,
                                     'plugin_rt_add'            => ALLSTANDARDRIGHT], true);
 
