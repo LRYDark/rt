@@ -106,3 +106,10 @@ function plugin_version_rt() { // fonction version du plugin (verification et af
       ]
    ];
 }
+
+/**
+ * @return bool
+ */
+function plugin_rt_check_prerequisites() {
+   return true;
+}

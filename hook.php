@@ -46,3 +46,5 @@ function plugin_rt_uninstall() { // fonction desintallation du plugin
    return true;
 }
 
+
+

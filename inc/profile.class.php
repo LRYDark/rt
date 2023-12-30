@@ -6,7 +6,7 @@ if (!defined('GLPI_ROOT')) {
 class PluginRtProfile extends Profile {
 
    static function getTypeName($nb = 0) {
-      return _n('Right management', 'Rights management', $nb, 'rp');
+      return _n('Right management', 'Rights management', $nb, 'rt');
    }
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
@@ -58,8 +58,6 @@ class PluginRtProfile extends Profile {
          ['itemtype' => 'PluginRtConfig',
          'label'    => __('Temps de trajet', 'rt'),
          'field'    => 'plugin_rt_rt',
-         'rights'   => [READ    => __('Read'),
-                        CREATE  => __('Create')]
          ],
          ['itemtype' => 'PluginRtConfig',
          'label'    => __('Affichage des infos sur les entitées', 'rt'),
@@ -68,7 +66,7 @@ class PluginRtProfile extends Profile {
          ],
          ['itemtype' => 'PluginRtConfig',
          'label'    => __('Ajout de demandeur', 'rt'),
-          'field'    => 'plugin_rt_add',
+         'field'    => 'plugin_rt_add',
          'rights'   => [CREATE  => __('Create')]
          ]
       ];
