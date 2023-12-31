@@ -51,7 +51,9 @@ class PluginRtTicket extends CommonDBTM {
     * @param $item    CommonDBTM object
    **/
    public static function countForItem(CommonDBTM $item) { 
-      return countElementsInTable(self::getTable(), ['tickets_id' => $item->getID()]);
+      if(Session::haveRight("plugin_rt_rt", READ) || Session::haveRight("plugin_rt_rt", CREATE) || Session::haveRight("plugin_rt_rt", UPDATE)){
+         return countElementsInTable(self::getTable(), ['tickets_id' => $item->getID()]);
+      }
    }
 
    /**
