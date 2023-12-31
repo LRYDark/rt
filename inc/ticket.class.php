@@ -11,7 +11,7 @@ class PluginRtTicket extends CommonDBTM {
    public  static  $EntitieAddress = 0 ;
 
    static function getTypeName($nb = 0) { // voir doc glpi 
-      if(Session::haveRight("plugin_rt_rt", READ) || Session::haveRight("plugin_rt_rt", CREATE) || Session::haveRight("plugin_rt_rt", UPDATE)){
+      if(Session::haveRight("plugin_rt_rt", READ)){
          return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
       }
    }
@@ -51,7 +51,7 @@ class PluginRtTicket extends CommonDBTM {
     * @param $item    CommonDBTM object
    **/
    public static function countForItem(CommonDBTM $item) { 
-      if(Session::haveRight("plugin_rt_rt", READ) || Session::haveRight("plugin_rt_rt", CREATE) || Session::haveRight("plugin_rt_rt", UPDATE)){
+      if(Session::haveRight("plugin_rt_rt", READ)){
          return countElementsInTable(self::getTable(), ['tickets_id' => $item->getID()]);
       }
    }
