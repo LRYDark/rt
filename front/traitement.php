@@ -31,6 +31,7 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
     $entity_id = $_GET['entity_id'];
     $username = $firstname.".".$lastname;
     $username = strtolower($username);
+    $mailto = $_GET['mailto'];
 
     if (filter_var($mail, FILTER_VALIDATE_EMAIL) === FALSE) {
         echo json_encode("Format du mail incorrect", JSON_UNESCAPED_UNICODE);
@@ -71,13 +72,19 @@ if(empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])
                     'users_id'   => $UserId,
                 ];
             if($usermail->add($InputUserMail)){
-                echo json_encode("Demandeur Ajouté avec succès", JSON_UNESCAPED_UNICODE);
+                $message = "Demandeur Ajouté avec succès";
+                echo json_encode($message, JSON_UNESCAPED_UNICODE);
+                if($mailto == "true"){
+                    $message = "<br>Informations d'identification envoyées par e-mail : " . $mail;
+                    echo json_encode($message, JSON_UNESCAPED_UNICODE);
+                }
             }else{
-                echo json_encode("<b>Erreur lors de l'ajout du mail du demandeur. Le demandeur a bien été ajouté sans son mail.", JSON_UNESCAPED_UNICODE);
+                $message = "<b>Erreur lors de l'ajout du mail du demandeur. Le demandeur a bien été ajouté sans son mail.";
+                echo json_encode($message, JSON_UNESCAPED_UNICODE);
             }
-    
         }else{
-            echo json_encode("<b>Erreur lors de l'ajout du demandeur : Le demandeur est peut être existant.", JSON_UNESCAPED_UNICODE);
+            $message = "<b>Erreur lors de l'ajout du demandeur : Le demandeur est peut être existant.";
+            echo json_encode($message, JSON_UNESCAPED_UNICODE);
         }
     }   
 }

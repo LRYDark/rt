@@ -700,70 +700,78 @@ class PluginRtTicket extends CommonDBTM {
                                        echo '<input type="tel" id="phone" name="phone" placeholder="Téléphone">';
                                     echo "</td>";
    
-                                    echo "<td>";
-                                          echo '<label for="email">Courriels</label><br>';
-                                       echo "<input type='mail' id='mail' name='email' required style='widtd: 850px;' placeholder='Courriels'>";
-                                    echo "</td>";
-                                 echo "</tr>";
-                                 echo "<input id='url' name='url' type='hidden' value=".PLUGIN_RT_WEBDIR." />";
-                              echo "</table>"; 
-                           echo "</div>";
-                        //Html::closeForm(); 
-                        echo '<div id="resultat"></div>';
+                                       echo "<td>";
+                                             echo "<label for='email'>Courriels</label>&nbsp<input type='checkbox' id='mailto' name='mailto' value='false' onchange='chState(this)'><br>";
+                                             //echo "<input type='checkbox' id='mailto' name='mailto' value='checkbox'>";
+                                          echo "<input type='mail' id='mail' name='email' required style='widtd: 850px;' placeholder='Courriels'>";
+                                       echo "</td>";
+                                    echo "</tr>";
+                                    echo "<input id='url' name='url' type='hidden' value=".PLUGIN_RT_WEBDIR." />";
+                                 echo "</table>"; 
+                              echo "</div>";
+                           //Html::closeForm(); 
+                           echo '<div id="resultat"></div>';
+                        echo '</div>';
+                     echo '<div class="modal-footer">';
+                        echo '<button id="submit" class="btn btn-primary">Envoyer</button>';
+                        echo '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>';
                      echo '</div>';
-                  echo '<div class="modal-footer">';
-                     echo '<button id="submit" class="btn btn-primary">Envoyer</button>';
-                     echo '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>';
                   echo '</div>';
                echo '</div>';
-            echo '</div>';
-            echo '</div>';
+               echo '</div>';
 
-            $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
-            $script = <<<JAVASCRIPT
-               // Affichage du bouton ajouter un demandeur 
-               $(document).ready(function() {
-                  // Vérifier si le bouton existe déjà
-                  var boutonExist = document.getElementById('btnAjouterDemandeur');
-               
-                  // Vérifier si l'élément existe
-                  if (boutonExist === null) {
-                     console.log('Le bouton existe pas.');
-                     $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
-                  } else {
-                     // Le bouton existe déjà, ne faites rien
-                     console.log('Le bouton existe déjà.');
-                  }
-               });
-               //--------------------------------------
+               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
+               $script = <<<JAVASCRIPT
+                  function chState(element)
+                     {
+                        if(element.checked) 
+                           element.value='true'; 
+                        else
+                           element.value='false';
+                     }
+                  // Affichage du bouton ajouter un demandeur 
+                  $(document).ready(function() {
+                     // Vérifier si le bouton existe déjà
+                     var boutonExist = document.getElementById('btnAjouterDemandeur');
+                  
+                     // Vérifier si l'élément existe
+                     if (boutonExist === null) {
+                        console.log('Le bouton existe pas.');
+                        $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+                     }
+                  //--------------------------------------
+                  //Action lors de l'ajout du demandeur
+                     document.getElementById('submit').addEventListener('click', function() {
 
-               //Action lors de l'ajout du demandeur
-                  document.getElementById('submit').addEventListener('click', function() {
+                        var lastname = document.getElementById('lastname').value;
+                        var firstname = document.getElementById('firstname').value;
+                        var mail = document.getElementById('mail').value;
+                        var phone = document.getElementById('phone').value;
+                        var url = document.getElementById('url').value;
+                        var mailto = document.getElementById('mailto').value;
 
-                     var lastname = document.getElementById('lastname').value;
-                     var firstname = document.getElementById('firstname').value;
-                     var mail = document.getElementById('mail').value;
-                     var phone = document.getElementById('phone').value;
-                     var url = document.getElementById('url').value;
+                        var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
+                           var entity_id = document.getElementById(id_element_select).value;
 
-                     var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
-                        var entity_id = document.getElementById(id_element_select).value;
-
-                     $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
-                        type: "GET",
-                        url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
-                        success: function(rep){
-                           $('#AddUser').modal('hide'); // Ferme le modal
-                           alert(rep);
-                        },
-                        error: function(err){
-                           $('#AddUser').modal('hide'); // Ferme le modal
-                           alert(err);
-                        }
-                     }); 
+                        $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
+                           type: "GET",
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + mailto,
+                           
+                           success: function(rep){
+                              $('#AddUser').modal('hide'); // Ferme le modal
+                              var messageWithoutQuotes = rep.replace(/"/g, '');
+                              alert(messageWithoutQuotes);
+                           },
+                           error: function(err){
+                              $('#AddUser').modal('hide'); // Ferme le modal
+                              var messageWithoutQuotes = err.replace(/"/g, '');
+                              alert(messageWithoutQuotes);
+                           }
+                        }); 
+                     });
                   });
-               //--------------------------------------
-            JAVASCRIPT;
+                  //--------------------------------------
+               JAVASCRIPT;
             echo Html::scriptBlock($script);
          }
       }
@@ -924,7 +932,8 @@ class PluginRtTicket extends CommonDBTM {
                                        echo "</td>";
       
                                        echo "<td>";
-                                             echo '<label for="email">Courriels</label><br>';
+                                             echo "<label for='email'>Courriels</label>&nbsp<input type='checkbox' id='mailto' name='mailto' value='false' onchange='chState(this)'><br>";
+                                             //echo "<input type='checkbox' id='mailto' name='mailto' value='checkbox'>";
                                           echo "<input type='mail' id='mail' name='email' required style='widtd: 850px;' placeholder='Courriels'>";
                                        echo "</td>";
                                     echo "</tr>";
@@ -944,6 +953,13 @@ class PluginRtTicket extends CommonDBTM {
 
                $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
                $script = <<<JAVASCRIPT
+                  function chState(element)
+                     {
+                        if(element.checked) 
+                           element.value='true'; 
+                        else
+                           element.value='false';
+                     }
                   // Affichage du bouton ajouter un demandeur 
                   $(document).ready(function() {
                      // Vérifier si le bouton existe déjà
@@ -953,9 +969,6 @@ class PluginRtTicket extends CommonDBTM {
                      if (boutonExist === null) {
                         console.log('Le bouton existe pas.');
                         $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
-                     } else {
-                        // Le bouton existe déjà, ne faites rien
-                        console.log('Le bouton existe déjà.');
                      }
                   //--------------------------------------
                   //Action lors de l'ajout du demandeur
@@ -966,20 +979,24 @@ class PluginRtTicket extends CommonDBTM {
                         var mail = document.getElementById('mail').value;
                         var phone = document.getElementById('phone').value;
                         var url = document.getElementById('url').value;
+                        var mailto = document.getElementById('mailto').value;
 
                         var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                            var entity_id = document.getElementById(id_element_select).value;
 
                         $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
                            type: "GET",
-                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + mailto,
+                           
                            success: function(rep){
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              alert(rep);
+                              var messageWithoutQuotes = rep.replace(/"/g, '');
+                              alert(messageWithoutQuotes);
                            },
                            error: function(err){
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              alert(err);
+                              var messageWithoutQuotes = err.replace(/"/g, '');
+                              alert(messageWithoutQuotes);
                            }
                         }); 
                      });
