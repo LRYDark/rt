@@ -720,7 +720,7 @@ class PluginRtTicket extends CommonDBTM {
                echo '</div>';
                echo '</div>';
 
-               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
+               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid; margin-left: -103px;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter</button></div>";
                $script = <<<JAVASCRIPT
                   function chState(element)
                      {
@@ -729,49 +729,47 @@ class PluginRtTicket extends CommonDBTM {
                         else
                            element.value='false';
                      }
-                  // Affichage du bouton ajouter un demandeur 
+                  // Affichage du bouton "Ajouter un demandeur" 
                   $(document).ready(function() {
                      // Vérifier si le bouton existe déjà
                      var boutonExist = document.getElementById('btnAjouterDemandeur');
                   
-                     // Vérifier si l'élément existe
                      if (boutonExist === null) {
-                        console.log('Le bouton existe pas.');
-                        $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+                        // Ciblez le conteneur du champ Demandeur et enveloppez le label et le bouton dans un conteneur flex
+                        var labelDemandeur = $(".accordion-actors .form-field").first().find("label");
+                        labelDemandeur.wrap("<div class='d-flex align-items-center'></div>");
+                        labelDemandeur.after("<div class='ms-auto'>{$entitie}</div>");
                      }
-                  //--------------------------------------
-                  //Action lors de l'ajout du demandeur
-                     document.getElementById('submit').addEventListener('click', function() {
 
+                     //--------------------------------------
+                     // Action lors de l'ajout du demandeur
+                     document.getElementById('submit').addEventListener('click', function() {
                         var lastname = document.getElementById('lastname').value;
                         var firstname = document.getElementById('firstname').value;
                         var mail = document.getElementById('mail').value;
                         var phone = document.getElementById('phone').value;
                         var url = document.getElementById('url').value;
-                        var mailto = document.getElementById('mailto').value;
 
                         var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
-                           var entity_id = document.getElementById(id_element_select).value;
+                        var entity_id = document.getElementById(id_element_select).value;
 
-                        $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
+                        $.ajax({ 
                            type: "GET",
-                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + mailto,
-                           
-                           success: function(rep){
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                           success: function(rep) {
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              var messageWithoutQuotes = rep.replace(/"/g, '');
-                              alert(messageWithoutQuotes);
+                              alert(rep);
                            },
-                           error: function(err){
+                           error: function(err) {
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              var messageWithoutQuotes = err.replace(/"/g, '');
-                              alert(messageWithoutQuotes);
+                              alert(err);
                            }
                         }); 
                      });
                   });
                   //--------------------------------------
                JAVASCRIPT;
+
             echo Html::scriptBlock($script);
          }
       }
@@ -951,7 +949,7 @@ class PluginRtTicket extends CommonDBTM {
                echo '</div>';
                echo '</div>';
 
-               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter un demandeur</button></div>";
+               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid; margin-left: -103px;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter</button></div>";
                $script = <<<JAVASCRIPT
                   function chState(element)
                      {
@@ -960,50 +958,48 @@ class PluginRtTicket extends CommonDBTM {
                         else
                            element.value='false';
                      }
-                  // Affichage du bouton ajouter un demandeur 
+                  // Affichage du bouton "Ajouter un demandeur" 
                   $(document).ready(function() {
                      // Vérifier si le bouton existe déjà
                      var boutonExist = document.getElementById('btnAjouterDemandeur');
                   
-                     // Vérifier si l'élément existe
                      if (boutonExist === null) {
-                        console.log('Le bouton existe pas.');
-                        $("div.accordion-body.accordion-actors.row.m-0.mt-n2").append("{$entitie}");
+                        // Ciblez le conteneur du champ Demandeur et enveloppez le label et le bouton dans un conteneur flex
+                        var labelDemandeur = $(".accordion-actors .form-field").first().find("label");
+                        labelDemandeur.wrap("<div class='d-flex align-items-center'></div>");
+                        labelDemandeur.after("<div class='ms-auto'>{$entitie}</div>");
                      }
-                  //--------------------------------------
-                  //Action lors de l'ajout du demandeur
-                     document.getElementById('submit').addEventListener('click', function() {
 
+                     //--------------------------------------
+                     // Action lors de l'ajout du demandeur
+                     document.getElementById('submit').addEventListener('click', function() {
                         var lastname = document.getElementById('lastname').value;
                         var firstname = document.getElementById('firstname').value;
                         var mail = document.getElementById('mail').value;
                         var phone = document.getElementById('phone').value;
                         var url = document.getElementById('url').value;
-                        var mailto = document.getElementById('mailto').value;
 
                         var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
-                           var entity_id = document.getElementById(id_element_select).value;
+                        var entity_id = document.getElementById(id_element_select).value;
 
-                        $.ajax({ //retunn value dans la page traitement.php pour recupérer les values et executé une requete SQL en php.
+                        $.ajax({ 
                            type: "GET",
-                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + mailto,
-                           
-                           success: function(rep){
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                           success: function(rep) {
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              var messageWithoutQuotes = rep.replace(/"/g, '');
-                              alert(messageWithoutQuotes);
+                              alert(rep);
                            },
-                           error: function(err){
+                           error: function(err) {
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              var messageWithoutQuotes = err.replace(/"/g, '');
-                              alert(messageWithoutQuotes);
+                              alert(err);
                            }
                         }); 
                      });
                   });
                   //--------------------------------------
                JAVASCRIPT;
-               echo Html::scriptBlock($script);
+
+            echo Html::scriptBlock($script);
          }
       }
    }
