@@ -87,7 +87,7 @@ if ($UserId = $user->add($InputUser)) {
             // génération et gestion des balises
             $Balises = array(
                 array('Balise' => '##id.user##'                     , 'Value' => $username),
-                array('Balise' => '##user.password##'               , 'Value' => $password),
+                array('Balise' => '##user.password##'               , 'Value' => $cleanedPassword),
                 array('Balise' => '##user.lastname##'               , 'Value' => $lastname),
                 array('Balise' => '##user.firstname##'              , 'Value' => $firstname),
             );
