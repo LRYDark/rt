@@ -149,6 +149,48 @@ class PluginRtConfig extends CommonDBTM
          echo "</td>";
       echo "</tr>";
 
+      $config->showFormHeader(['colspan' => 4]);
+      echo "<tr><th colspan='2'>" . __('Configuration mail', 'rp') . "</th></tr>";
+
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Autorisation d'envoyer les informations d'identification par mail lors de la création d'un demandeur.", "rt") . "</td><td>";
+            Dropdown::showYesNo('mail', $config->mail(), -1);
+         echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Autorisation de créer un nouveau demandeur.", "rt") . "</td><td>";
+            Dropdown::showYesNo('adduser', $config->adduser(), -1);
+         echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td> Gabarit : Modèle de notifications </td>";
+      echo "<td>";
+
+      //notificationtemplates_id
+      Dropdown::show('NotificationTemplate', [
+         'name' => 'gabarit',
+         'value' => $config->gabarit(),
+         'display_emptychoice' => 1,
+         'specific_tags' => [],
+         'itemtype' => 'NotificationTemplate',
+         'displaywith' => [],
+         'emptylabel' => "-----",
+         'used' => [],
+         'toadd' => [],
+         'entity_restrict' => 0,
+      ]); 
+      echo "</td></tr>";
+
+      // balises prise en charge
+         echo "<tr class='tab_bg_1'><td> <b>Balises prisent en charge :</b>  </td></tr>";
+         echo "<tr class='tab_bg_1'><td> ##id.user## </td><td> Information d'identification de l'utilisateur : prénom.nom </td></tr>";
+         echo "<tr class='tab_bg_1'><td> ##user.password## </td><td> Information du mot de passe de l'utilisateur </td></tr>";
+         echo "<tr class='tab_bg_1'><td> ##user.lastname## </td><td> Informations sur le nom de famille </td></tr>";
+         echo "<tr class='tab_bg_1'><td> ##user.firstname## </td><td> Informations sur le prénom </td></tr>";
+      // balises prise en charge
+   
       $config->showFormButtons(['candel' => false]);
       return false;
    }
@@ -185,6 +227,18 @@ class PluginRtConfig extends CommonDBTM
    function showToken()
    {
       return ($this->fields['token']);
+   }
+   function gabarit()
+   {
+      return ($this->fields['gabarit']);
+   }
+   function mail()
+   {
+      return ($this->fields['mail'] ? true : false);
+   }
+   function adduser()
+   {
+      return ($this->fields['adduser'] ? true : false);
    }
    // return fonction
 
@@ -235,6 +289,9 @@ class PluginRtConfig extends CommonDBTM
                   `fromonglettrajet` TINYINT NOT NULL DEFAULT '1',
                   `showtime` TINYINT NOT NULL DEFAULT '1',
                   `token` VARCHAR(255) NULL,
+                  `gabarit` INT(10) NOT NULL DEFAULT '0',
+                  `mail` TINYINT NOT NULL DEFAULT '0',
+                  `adduser` TINYINT NOT NULL DEFAULT '1',
                   PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());

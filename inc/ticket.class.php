@@ -1034,7 +1034,7 @@ class PluginRtTicket extends CommonDBTM {
 
                               } catch (e) {
                                  // Affichez une erreur si la réponse ne peut pas être analysée
-                                 alert("Erreur de parsing de la réponse : " + e.message);
+                                 alert("Erreur lors de la gestion : " + e.message);
                               }
                            },
                            error: function(err) {
@@ -1044,7 +1044,7 @@ class PluginRtTicket extends CommonDBTM {
                                  errorMessage = errorResponse.error; // Utilisez uniquement le message d'erreur
                                  alert(errorMessage);   // Affichez le message d'erreur propre                                 
                               } catch (e) {
-                                 alert("Erreur lors de la gestion de l'erreur : " + e.message);
+                                 alert("Erreur lors de la gestion : " + e.message);
                               }
                            }
                         }); 
