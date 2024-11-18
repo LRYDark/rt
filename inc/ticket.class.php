@@ -978,20 +978,74 @@ class PluginRtTicket extends CommonDBTM {
                         var mail = document.getElementById('mail').value;
                         var phone = document.getElementById('phone').value;
                         var url = document.getElementById('url').value;
+                        var checkbox = document.getElementById('mailto');
+
+                        console.log(checkbox.value);
 
                         var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                         var entity_id = document.getElementById(id_element_select).value;
 
                         $.ajax({ 
                            type: "GET",
-                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id,
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + checkbox.value,
                            success: function(rep) {
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              alert(rep);
+                              try {
+                                 var response = JSON.parse(rep); // Parsez la réponse JSON
+
+                                 // Créez un contenu pour afficher le message avec le mot de passe masqué
+                                 var message = response.success + `
+                                    <p style="margin-top: 25px;">
+                                       <strong>Identifiant créé :</strong> 
+                                       <span id="userField">********</span></br>
+                                       <strong>Mot de passe temporaire créé :</strong> 
+                                       <span id="passwordField">********</span>
+                                    </p>
+                                    <button id="togglePassword" class="btn btn-secondary">Voir mot de passe</button>
+                                 `;
+
+                                 // Utilisez `glpi_html_dialog` pour afficher la modale
+                                 glpi_html_dialog({
+                                    title: 'Information',
+                                    body: message,
+                                    buttons: [
+                                       {
+                                          text: "OK",
+                                          click: function() {
+                                             $(this).dialog("close");
+                                          }
+                                       }
+                                    ]
+                                 });
+
+                                 $('#userField').text(response.user);
+
+                                 // Ajouter un gestionnaire d'événements pour le bouton "Voir mot de passe"
+                                 $('#togglePassword').on('click', function() {
+                                    var passwordField = $('#passwordField');
+                                    if (passwordField.text() === '********') {
+                                       passwordField.text(response.password);
+                                       $(this).text('Masquer mot de passe');
+                                    } else {
+                                       passwordField.text('********');
+                                       $(this).text('Voir mot de passe');
+                                    }
+                                 });
+
+                              } catch (e) {
+                                 // Affichez une erreur si la réponse ne peut pas être analysée
+                                 alert("Erreur de parsing de la réponse : " + e.message);
+                              }
                            },
                            error: function(err) {
                               $('#AddUser').modal('hide'); // Ferme le modal
-                              alert(err);
+                              try {
+                                 var errorResponse = JSON.parse(err.responseText);// Récupérez le texte de la réponse
+                                 errorMessage = errorResponse.error; // Utilisez uniquement le message d'erreur
+                                 alert(errorMessage);   // Affichez le message d'erreur propre                                 
+                              } catch (e) {
+                                 alert("Erreur lors de la gestion de l'erreur : " + e.message);
+                              }
                            }
                         }); 
                      });
