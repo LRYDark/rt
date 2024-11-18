@@ -83,7 +83,7 @@ if ($UserId = $user->add($InputUser)) {
     if ($usermail->add($InputUserMail)) {
         $cleanedPassword = cleanString($entities_name->name . $lastname); // Mot de passe non haché
 
-        if ($mailto == "true") {        
+        if ($mailto == "true") { 
             // génération et gestion des balises
             $Balises = array(
                 array('Balise' => '##id.user##'                     , 'Value' => $username),
@@ -108,8 +108,14 @@ if ($UserId = $user->add($InputUser)) {
 
             $notificationtemplates_id = $config->fields['gabarit'];
             $NotifMailTemplate = $DB->query("SELECT * FROM glpi_notificationtemplatetranslations WHERE notificationtemplates_id=$notificationtemplates_id")->fetch_object();
+            
+            if ($NotifMailTemplate) {
                 $BodyHtml = html_entity_decode($NotifMailTemplate->content_html, ENT_QUOTES, 'UTF-8');
                 $BodyText = html_entity_decode($NotifMailTemplate->content_text, ENT_QUOTES, 'UTF-8');
+            } else {
+                http_response_code(400); // Code d'erreur HTTP
+                echo json_encode(["error" => "Erreur !! Aucun gabarit rattaché, impossible d'envoyer un e-mail."], JSON_UNESCAPED_UNICODE);
+            }            
 
             $footer = $DB->query("SELECT value FROM glpi_configs WHERE name = 'mailing_signature'")->fetch_object();
             if(!empty($footer->value)){$footer = html_entity_decode($footer->value, ENT_QUOTES, 'UTF-8');}else{$footer='';}
@@ -133,7 +139,7 @@ if ($UserId = $user->add($InputUser)) {
                 $mmail->AltBody = GLPIMailer::normalizeBreaks(balise($BodyText)).$footer;
 
                 // envoie du mail
-                if(!$mmail->send()) {
+                if($mmail->send()) {
                     $message = [
                         "success" => "Demandeur Ajouté avec succès, informations envoyées par e-mail à : " . $mail,
                         "user" => $username,

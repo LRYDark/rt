@@ -159,12 +159,6 @@ class PluginRtConfig extends CommonDBTM
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-         echo "<td>" . __("Autorisation de créer un nouveau demandeur.", "rt") . "</td><td>";
-            Dropdown::showYesNo('adduser', $config->adduser(), -1);
-         echo "</td>";
-      echo "</tr>";
-
-      echo "<tr class='tab_bg_1'>";
       echo "<td> Gabarit : Modèle de notifications </td>";
       echo "<td>";
 
@@ -236,10 +230,6 @@ class PluginRtConfig extends CommonDBTM
    {
       return ($this->fields['mail'] ? true : false);
    }
-   function adduser()
-   {
-      return ($this->fields['adduser'] ? true : false);
-   }
    // return fonction
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
@@ -290,8 +280,7 @@ class PluginRtConfig extends CommonDBTM
                   `showtime` TINYINT NOT NULL DEFAULT '1',
                   `token` VARCHAR(255) NULL,
                   /*`gabarit` INT(10) NOT NULL DEFAULT '0',
-                  `mail` TINYINT NOT NULL DEFAULT '0',
-                  `adduser` TINYINT NOT NULL DEFAULT '1',*/
+                  `mail` TINYINT NOT NULL DEFAULT '0',*/
                   PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
@@ -306,7 +295,6 @@ class PluginRtConfig extends CommonDBTM
          $fieldsToAdd = [
             'gabarit' => "INT(10) NOT NULL DEFAULT '0'",
             'mail' => "TINYINT NOT NULL DEFAULT '0'",
-            'adduser' => "TINYINT NOT NULL DEFAULT '1'",
          ];
 
          foreach ($fieldsToAdd as $field => $definition) {
