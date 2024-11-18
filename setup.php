@@ -1,5 +1,5 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.4.0'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.5.0'); // version du plugin
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
@@ -7,6 +7,7 @@ define("PLUGIN_RT_MIN_GLPI", "10.0.3");
 define("PLUGIN_RT_MAX_GLPI", "10.2.0");
 
 define("PLUGIN_RT_WEBDIR", Plugin::getWebDir("rt"));
+define("PLUGIN_RT_DIR", Plugin::getPhpDir("rt"));
 
 /****************************************************************************************************************************************** */
 if (!isset($_SESSION['alert_displayedRT']) && isset($_SESSION['glpiID']) && $_SESSION['glpiactiveprofile']['name'] == 'Super-Admin'){

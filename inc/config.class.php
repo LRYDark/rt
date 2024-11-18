@@ -289,14 +289,39 @@ class PluginRtConfig extends CommonDBTM
                   `fromonglettrajet` TINYINT NOT NULL DEFAULT '1',
                   `showtime` TINYINT NOT NULL DEFAULT '1',
                   `token` VARCHAR(255) NULL,
-                  `gabarit` INT(10) NOT NULL DEFAULT '0',
+                  /*`gabarit` INT(10) NOT NULL DEFAULT '0',
                   `mail` TINYINT NOT NULL DEFAULT '0',
-                  `adduser` TINYINT NOT NULL DEFAULT '1',
+                  `adduser` TINYINT NOT NULL DEFAULT '1',*/
                   PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
          $DB->query($query) or die($DB->error());
          $config->add(['id' => 1,]);
       }
+
+      // Mise à jour de la table si elle existe déjà
+      if ($DB->tableExists($table)) {
+         $migration->displayMessage("Updating $table");
+
+         // Ajouter les nouvelles colonnes si elles n'existent pas
+         $fieldsToAdd = [
+            'gabarit' => "INT(10) NOT NULL DEFAULT '0'",
+            'mail' => "TINYINT NOT NULL DEFAULT '0'",
+            'adduser' => "TINYINT NOT NULL DEFAULT '1'",
+         ];
+
+         foreach ($fieldsToAdd as $field => $definition) {
+            if (!$DB->fieldExists($table, $field)) {
+               $query = "ALTER TABLE $table ADD `$field` $definition;";
+               $DB->query($query) or die($DB->error());
+            }
+         }
+      }
+
+      $DB->runFile(PLUGIN_RT_DIR . "/empty-add-NotificationMail_rt.sql");
+      $ID = $DB->query("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'")->fetch_object();
+
+      $query= "UPDATE glpi_plugin_rt_configs SET gabarit = $ID->id WHERE id=1;";
+      $DB->query($query) or die($DB->error());
    }
 
    static function uninstall(Migration $migration)
