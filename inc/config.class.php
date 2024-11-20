@@ -305,6 +305,20 @@ class PluginRtConfig extends CommonDBTM
          }
       }
 
+      $result = $DB->query("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'");
+
+      while ($ID = $result->fetch_object()) {
+          if (!empty($ID->id)) {
+              // Suppression de la ligne dans glpi_notificationtemplates
+              $deleteTemplateQuery = "DELETE FROM glpi_notificationtemplates WHERE id = {$ID->id}";
+              $DB->query($deleteTemplateQuery);
+      
+              // Suppression de la ligne correspondante dans glpi_notificationtemplatetranslations
+              $deleteTranslationQuery = "DELETE FROM glpi_notificationtemplatetranslations WHERE notificationtemplates_id = {$ID->id}";
+              $DB->query($deleteTranslationQuery);
+          }
+      }
+
       $DB->runFile(PLUGIN_RT_DIR . "/empty-add-NotificationMail_rt.sql");
       $ID = $DB->query("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'")->fetch_object();
 
