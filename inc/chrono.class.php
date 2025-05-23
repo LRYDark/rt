@@ -115,13 +115,39 @@ if (!empty($_GET['_target'])){
                     }
 
                     if($config->fields['showactivatetimer'] == 1){
-                        $script = <<<JAVASCRIPT
-                            $(document).ready(function() {
-                            $("div.navigationheader.justify-content-sm-between").append("<div class='TimerBadge'><span class='chrono' id='chronotime'>0:00:00</span>{$Chrono}</div>");
-                                chronoStart();
-                            });
-                        JAVASCRIPT;
-                        echo Html::scriptBlock($script);
+
+                        
+$bgColor = $config->fields['showBackgroundTimer'];
+$textColor = $config->fields['showColorTimer'];
+
+$script = <<<JAVASCRIPT
+    $(document).ready(function() {
+        const chrono = $("<span>", {
+            class: "input-group-text TimerBadge pe-2",
+            style: "background: {$bgColor}; color: {$textColor}; display: flex; align-items: center;",
+            html: `
+                <div class='d-flex align-items-center'>
+                    <span class='chrono me-2' id='chronotime'>0:00:00</span>
+                    {$Chrono}
+                </div>
+            `
+        });
+
+        const searchGroup = $(".navbar form .input-group.input-group-flat");
+
+        if (searchGroup.length) {
+            searchGroup.prepend(chrono);
+        }
+
+        if (typeof chronoStart === 'function') {
+            chronoStart();
+        }
+    });
+JAVASCRIPT;
+
+echo Html::scriptBlock($script);
+
+
                     }else{
                         $script = <<<JAVASCRIPT
                             $(document).ready(function() {
