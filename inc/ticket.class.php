@@ -10,6 +10,10 @@ class PluginRtTicket extends CommonDBTM {
    public static $rightname = 'ticket';
    public  static  $EntitieAddress = 0 ;
 
+   static function getIcon() {
+      return "fa-solid fa-car";
+   }
+
    static function getTypeName($nb = 0) { // voir doc glpi 
       if(Session::haveRight("plugin_rt_rt", READ)){
          return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
