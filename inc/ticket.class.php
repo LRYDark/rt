@@ -393,7 +393,7 @@ class PluginRtTicket extends CommonDBTM {
 
          $result = $DB->doQuery("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
 
-         if ($item->input['routetime_quantity']/60 != $result->routetime){
+         if ($result && $item->input['routetime_quantity']/60 != $result->routetime) {
             if (!$item->isNewItem()){
                if(!empty($result->routetime) || $result->routetime == '0'){
                   if($quantity != $result->routetime){
@@ -884,8 +884,8 @@ class PluginRtTicket extends CommonDBTM {
 
                // verification des variables + affichage des infos de l'entité avec création d'un liens de recherche, filtré en fonction de l'entité.
             if (!empty($complement) || !empty($address)){
-            $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
-$entitie = "<div class='form-field row align-items-center col-12 glpi-full-width mb-2'><label class='col-form-label col-xxl-2 text-xxl-end'>Info entité </label><div class='col-xxl-10 field-container'><span class='glpi-badge'>$value</span></div></div>";
+               $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
+               $entitie = "<div class='form-field row align-items-center col-12 glpi-full-width mb-2'><label class='col-form-label col-xxl-2 text-xxl-end'>Info entité </label><div class='col-xxl-10 field-container'><span class='glpi-badge'>$value</span></div></div>";
                   $script = <<<JAVASCRIPT
                      $(document).ready(function() {
                         $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
@@ -929,9 +929,9 @@ $entitie = "<div class='form-field row align-items-center col-12 glpi-full-width
                                        echo "<td>";
                                              echo "<label for='name'>Entité du demandeur</label><br>";
                                                 Dropdown::show('Entity', [
-                                                   'name' => 'add_user_for_entities_id',
+                                                   'name'   => 'add_user_for_entities_id',
                                                    'width'  => '80%',
-                                                   'value' => $result->id,
+                                                   'value'  => isset($result) ? $result->id : 0,
                                                 ]);                                   
                                           echo "</select>";
                                        echo "</td>";
