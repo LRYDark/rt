@@ -1,0 +1,46 @@
+{# @rt/tickets/config.html.twig #}
+
+{# Plus besoin des macros si on n’affiche que ton tableau #}
+{# {% import "components/form/fields_macros.html.twig" as fields %} #}
+
+{% if embed_in_ticket_form %}
+            </div>
+        </section>
+    </section>
+
+    <section class="accordion-item" aria-label="{{ type_name }}">
+        <div class="accordion-header" id="heading-plugin-rt-ticket-config">
+            <button
+                class="accordion-button {{ uncollapsed ? '' : 'collapsed' }}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#plugin-rt-ticket-config"
+                aria-expanded="{{ uncollapsed ? 'true' : 'false' }}"
+                aria-controls="plugin-rt-ticket-config">
+                <i class="ti ti-clock-hour-4 me-1"></i>
+                <span class="item-title">{{ type_name }}</span>
+            </button>
+        </div>
+
+        <div id="plugin-rt-ticket-config"
+             class="accordion-collapse collapse {{ uncollapsed ? 'show' : '' }}"
+             aria-labelledby="heading-plugin-rt-ticket-config">
+
+            <div class="accordion-body row m-0 mt-n2">
+                <div class="card border-0 shadow-none">
+                    <div class="card-body">
+                        {{ times_table_html|raw }}
+                    </div>
+                </div>
+            </div>
+{% else %}
+    {# Affichage autonome (onglet) : simple card, pas de formulaire/bouton #}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title m-0">{{ type_name }}</h3>
+        </div>
+        <div class="card-body">
+            {{ times_table_html|raw }}
+        </div>
+    </div>
+{% endif %}

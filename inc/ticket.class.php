@@ -87,59 +87,6 @@ class PluginRtTicket extends CommonDBTM {
    }
 
    /**
-    * Get all tickets for a routes times.
-    *
-    * @param $ID           integer     plugin_rt_entities_id ID
-    * @return array of vouchers
-   **/
-   /*static function getAllForRtEntity($ID): array {
-      global $DB;
-
-      $request = [
-         'SELECT' => '*',
-         'FROM'   => self::getTable(),
-         'WHERE'  => [
-            'plugin_rt_entities_id' => $ID
-         ],
-         'ORDER'  => ['id DESC'],
-      ];
-
-      $tickets = [];
-      foreach ($DB->request($request) as $data) {
-         $tickets[$data['id']] = $data;
-      }
-
-      return $tickets;
-   }*/
-
-   /**
-    * Get consumed tickets for rt entity entry
-    *
-    * @param $ID integer PluginRtEntity id
-   **/
-   /*static function getConsumedForRtEntity($ID) {
-      global $DB;
-
-      $tot   = 0;
-
-      $request = [
-         'SELECT' => ['SUM' => 'consumed as sum'],
-         'FROM'   => self::getTable(),
-         'WHERE'  => [
-            'plugin_rt_entities_id' => $ID
-         ],
-      ];
-
-      if ($result = $DB->request($request)) {
-         if ($row = $result->current()) {
-            $tot = $row['sum'];
-         }
-      }
-
-      return $tot;
-   }*/
-
-   /**
     * Show routes times consumed for a ticket
     *
     * @param $ticket Ticket object
@@ -342,6 +289,11 @@ class PluginRtTicket extends CommonDBTM {
       global $CFG_GLPI, $DB;
 
       $item = $params['item'];
+
+      if ($item instanceof Ticket) {
+         echo PluginRtTicketConfig::showForTicket($item, true);
+         return;
+      }
 
       if(Session::haveRight("plugin_rt_rt", CREATE)){
          if (!($item instanceof ITILSolution)
@@ -933,49 +885,8 @@ class PluginRtTicket extends CommonDBTM {
                // verification des variables + affichage des infos de l'entité avec création d'un liens de recherche, filtré en fonction de l'entité.
             if (!empty($complement) || !empty($address)){
             $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
-            $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $value </span>";
+$entitie = "<div class='form-field row align-items-center col-12 glpi-full-width mb-2'><label class='col-form-label col-xxl-2 text-xxl-end'>Info entité </label><div class='col-xxl-10 field-container'><span class='glpi-badge'>$value</span></div></div>";
                   $script = <<<JAVASCRIPT
-                     $(document).ready(function() {
-                        $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
-                     });
-                  JAVASCRIPT;
-               echo Html::scriptBlock($script);
-            }
-            
-            // Affichage du temps total du ticket
-            $config = new PluginRtConfig();
-            if ($config->fields['showtime'] == 1){
-               $result_total_task   = $DB->doQuery("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
-               if(!empty($result_total_task->TotalTask)){ // recupération du temps total des taches
-
-                  $result_total_min_task = $result_total_task->TotalTask/60;
-                  $heures = floor($result_total_min_task / 60);
-                  $minutes_restantes = $result_total_min_task % 60;
-                  $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
-                  $result_total_task = $result_total_hour_task .' | '. $result_total_min_task .' min';
-
-               }else{
-                  $result_total_task = 'Aucune durée';
-               }
-               
-               $result_total_trajet = $DB->doQuery("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
-               if(!empty($result_total_trajet->TotalTrajet)){// recupération du temps total des trajet
-
-                  $result_total_min_trajet = $result_total_trajet->TotalTrajet;
-                  $heures = floor($result_total_min_trajet / 60);
-                  $minutes_restantes = $result_total_min_trajet % 60;
-                  $result_total_hour_task = $heures . 'h' . str_pad($minutes_restantes, 2, '0', STR_PAD_LEFT);
-                  $result_total_trajet = $result_total_hour_task .' | '. $result_total_min_trajet .' min';
-
-               }else{
-                  $result_total_trajet = 'Aucune durée';
-               }
-
-               $tableau = "<table class='table table-bordered'><tr><th scope='col'>Durée des tâches</th><th scope='col'>Durée des trajets</th></tr><tr><td>$result_total_task</td><td>$result_total_trajet</td></tr></table>";
-               $entitie = "<span class='entity-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $tableau </span>";
-
-               //affichage du tableau 
-               $script = <<<JAVASCRIPT
                      $(document).ready(function() {
                         $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append("{$entitie}");
                      });

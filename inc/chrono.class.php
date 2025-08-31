@@ -83,29 +83,29 @@ if (!empty($_GET['_target'])){
                 global $DB, $timerOn;
                 $config = new PluginRtConfig();
 
+                ?>
+                <style>
+                    .TimerBadge {
+                        display: inline-block;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                        align-items: center;
+                        background: <?php echo $config->fields['showBackgroundTimer']; ?> !important;
+                        color: <?php echo $config->fields['showColorTimer']; ?> !important;
+                        padding: calc(0.25rem - 1px) 0.25rem;
+                        border: 1px solid transparent;
+                        border-radius: 4px;
+                        font-size: 0.7rem;
+                    }
+                    .chrono{
+                        font-size: 12px;
+                        margin-right: 5px;
+                    }
+                </style>
+                <?php
+
                 if($config->fields['showtimer'] == 1 && $timerOn == 0){// timer
                     $timerOn = 1;
-                    ?>
-                    <style>
-                        .TimerBadge {
-                            display: inline-block;
-                            flex-wrap: wrap;
-                            justify-content: center;
-                            align-items: center;
-                            background: <?php echo $config->fields['showBackgroundTimer']; ?>;
-                            color: <?php echo $config->fields['showColorTimer']; ?>;
-                            padding: calc(0.25rem - 1px) 0.25rem;
-                            border: 1px solid transparent;
-                            border-radius: 4px;
-                            font-size: 0.7rem;
-                        }
-                        .chrono{
-                            font-size: 12px;
-                            margin-right: 5px;
-                        }
-                    </style>
-                    <?php
-
                     if($config->fields['showPlayPauseButton'] == 1 || $config->fields['showactivatetimer'] == 0){
                         if ($config->fields['showcolorbutton'] == 0){
                             $Chrono = "<form name='chronoForm'><input type='button' style='background-color: white; border: none; margin-right: 5px;' class='fa-solid fa-play fa-pause' name='startstop' value='&#xf04b &#xf04c' onClick='chronoStart()'/><input type='button' style='background-color: white; border: none;' class='fas fa-sync-alt' name='reset' value='&#xf2f1'/></form>";
@@ -115,39 +115,34 @@ if (!empty($_GET['_target'])){
                     }
 
                     if($config->fields['showactivatetimer'] == 1){
+                        $bgColor = $config->fields['showBackgroundTimer'];
+                        $textColor = $config->fields['showColorTimer'];
 
-                        
-$bgColor = $config->fields['showBackgroundTimer'];
-$textColor = $config->fields['showColorTimer'];
+                        $script = <<<JAVASCRIPT
+                            $(document).ready(function() {
+                                const chrono = $("<span>", {
+                                    class: "input-group-text TimerBadge pe-2",
+                                    style: "background: {$bgColor}; color: {$textColor}; display: flex; align-items: center;",
+                                    html: `
+                                        <div class='d-flex align-items-center'>
+                                            <span class='chrono me-2' id='chronotime'>0:00:00</span>
+                                            {$Chrono}
+                                        </div>
+                                    `
+                                });
 
-$script = <<<JAVASCRIPT
-    $(document).ready(function() {
-        const chrono = $("<span>", {
-            class: "input-group-text TimerBadge pe-2",
-            style: "background: {$bgColor}; color: {$textColor}; display: flex; align-items: center;",
-            html: `
-                <div class='d-flex align-items-center'>
-                    <span class='chrono me-2' id='chronotime'>0:00:00</span>
-                    {$Chrono}
-                </div>
-            `
-        });
+                                const searchGroup = $(".navbar form .input-group.input-group-flat");
 
-        const searchGroup = $(".navbar form .input-group.input-group-flat");
+                                if (searchGroup.length) {
+                                    searchGroup.prepend(chrono);
+                                }
 
-        if (searchGroup.length) {
-            searchGroup.prepend(chrono);
-        }
-
-        if (typeof chronoStart === 'function') {
-            chronoStart();
-        }
-    });
-JAVASCRIPT;
-
-echo Html::scriptBlock($script);
-
-
+                                if (typeof chronoStart === 'function') {
+                                    chronoStart();
+                                }
+                            });
+                        JAVASCRIPT;
+                        echo Html::scriptBlock($script);
                     }else{
                         $script = <<<JAVASCRIPT
                             $(document).ready(function() {
