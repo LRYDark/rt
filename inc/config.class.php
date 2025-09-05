@@ -17,6 +17,26 @@ class PluginRtConfig extends CommonDBTM
       }
    }
 
+   static function canCreate()
+   {
+      return Session::haveRight('config', UPDATE);
+   }
+
+   static function canView()
+   {
+      return Session::haveRight('config', READ);
+   }
+
+   static function canUpdate()
+   {
+      return Session::haveRight('config', UPDATE);
+   }
+
+   static function getTypeName($nb = 0)
+   {
+      return __("Chrono / Temps de trajet ", "rt");
+   }
+
    static function getInstance()
    {
       if (!isset(self::$_instance)) {
@@ -101,6 +121,16 @@ class PluginRtConfig extends CommonDBTM
          echo "</tr>";
       }
 
+      /*echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Appliquée les couleurs par défaut", "rt") . "</td><td>";
+      echo Html::submit('defaut', ['name' => 'default', 'value' => 'Defaut', 'class' => 'btn btn-info me-2']); // bouton / config par defaut
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_2 center'><td colspan='2'>";
+      echo Html::submit(_sx('button', 'Save'), ['name' => 'update_config', 'class' => 'btn btn-primary']); // bouton save
+      echo "</td></tr>";*/
+
       echo "<tr class='tab_bg_1'>";
          echo "<td>" . __("Affichage du recapitulatif des durées dans le ticket.", "rt") . "</td><td>";
             Dropdown::showYesNo('showtime', $config->showTime(), -1);
@@ -110,6 +140,18 @@ class PluginRtConfig extends CommonDBTM
       echo "<tr class='tab_bg_1'>";
          echo "<td>" . __("Affichage de l'onglet temps de trajet dans le ticket.", "rt") . "</td><td>";
             Dropdown::showYesNo('fromonglettrajet', $config->fromOngletTrajet(), -1);
+         echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Token ORS Maps.", "rt") . "</td><td>";
+            echo Html::input('ORS_API_KEY', ['value' => $config->ORS_API_KEY(), 'size' => 120]);// bouton configuration du bas de page line 1
+         echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Token GitHub.", "rt") . "</td><td>";
+            echo Html::input('token', ['value' => $config->showToken(), 'size' => 120, 'maxlength' => 80]);// bouton configuration du bas de page line 1
          echo "</td>";
       echo "</tr>";
 
@@ -149,11 +191,6 @@ class PluginRtConfig extends CommonDBTM
          echo "<tr class='tab_bg_1'><td> ##user.firstname## </td><td> Informations sur le prénom </td></tr>";
       // balises prise en charge
    
-      echo "<tr class='tab_bg_1'>";
-      echo "<td class='center' colspan='2'>";
-      echo "<input type='submit' class='submit' name='update' value=\"" . __('Save') . "\">";
-      echo "</td>";
-      echo "</tr>";
       $config->showFormButtons(['candel' => false]);
       return false;
    }
@@ -187,6 +224,14 @@ class PluginRtConfig extends CommonDBTM
    {
       return ($this->fields['showPlayPauseButton'] ? true : false);
    }
+   function showToken()
+   {
+      return ($this->fields['token']);
+   }
+   function ORS_API_KEY()
+   {
+      return ($this->fields['ORS_API_KEY']);
+   }
    function gabarit()
    {
       return ($this->fields['gabarit']);
@@ -201,8 +246,7 @@ class PluginRtConfig extends CommonDBTM
    {
 
       if ($item->getType() == 'Config') {
-         //return __("Chrono / Temps de trajet ", "rt");
-         return __('<span class="d-flex align-items-center"><i class="fa-solid fa-car me-2"></i>Chrono / Temps de trajet</span>', "rt");
+         return __("Chrono / Temps de trajet ", "rt");
       }
       return '';
    }
@@ -228,7 +272,7 @@ class PluginRtConfig extends CommonDBTM
       $config = new self();
       if ($DB->tableExists($table)) {
          $query = "DROP TABLE $table";
-         $DB->doQuery($query) or die($DB->error());
+         $DB->query($query) or die($DB->error());
       }
       if (!$DB->tableExists($table)) {
 
@@ -244,11 +288,12 @@ class PluginRtConfig extends CommonDBTM
                   `showPlayPauseButton` TINYINT NOT NULL DEFAULT '1',
                   `fromonglettrajet` TINYINT NOT NULL DEFAULT '1',
                   `showtime` TINYINT NOT NULL DEFAULT '1',
+                  `token` VARCHAR(255) NULL,
                   /*`gabarit` INT(10) NOT NULL DEFAULT '0',
                   `mail` TINYINT NOT NULL DEFAULT '0',*/
                   PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
-         $DB->doQuery($query) or die($DB->error());
+         $DB->query($query) or die($DB->error());
          $config->add(['id' => 1,]);
       }
 
@@ -265,22 +310,22 @@ class PluginRtConfig extends CommonDBTM
          foreach ($fieldsToAdd as $field => $definition) {
             if (!$DB->fieldExists($table, $field)) {
                $query = "ALTER TABLE $table ADD `$field` $definition;";
-               $DB->doQuery($query) or die($DB->error());
+               $DB->query($query) or die($DB->error());
             }
          }
       }
 
-      $result = $DB->doQuery("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'");
+      $result = $DB->query("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'");
 
       while ($ID = $result->fetch_object()) {
           if (!empty($ID->id)) {
               // Suppression de la ligne dans glpi_notificationtemplates
               $deleteTemplateQuery = "DELETE FROM glpi_notificationtemplates WHERE id = {$ID->id}";
-              $DB->doQuery($deleteTemplateQuery);
+              $DB->query($deleteTemplateQuery);
       
               // Suppression de la ligne correspondante dans glpi_notificationtemplatetranslations
               $deleteTranslationQuery = "DELETE FROM glpi_notificationtemplatetranslations WHERE notificationtemplates_id = {$ID->id}";
-              $DB->doQuery($deleteTranslationQuery);
+              $DB->query($deleteTranslationQuery);
           }
       }
 
@@ -521,19 +566,38 @@ class PluginRtConfig extends CommonDBTM
       // Construire la requête d'insertion
       $insertQuery1 = "INSERT INTO `glpi_notificationtemplates` (`name`, `itemtype`, `date_mod`, `comment`, `css`, `date_creation`) VALUES ('RT Ajout Demandeur', 'Ticket', NULL, 'Created by the plugin RT', '', NULL);";
       // Exécuter la requête
-      $DB->doQuery($insertQuery1);
+      $DB->query($insertQuery1);
 
       // Construire la requête d'insertion
       $insertQuery2 = "INSERT INTO `glpi_notificationtemplatetranslations` 
          (`notificationtemplates_id`, `language`, `subject`, `content_text`, `content_html`) 
          VALUES (LAST_INSERT_ID(), 'fr_FR', '[GLPI] | Vos informations de connexion JCD', '', '{$content_html_escaped}')";
       // Exécuter la requête
-      $DB->doQuery($insertQuery2);
+      $DB->query($insertQuery2);
 
-      $ID = $DB->doQuery("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'")->fetch_object();
+      $ID = $DB->query("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'")->fetch_object();
 
       $query= "UPDATE glpi_plugin_rt_configs SET gabarit = $ID->id WHERE id=1;";
-      $DB->doQuery($query) or die($DB->error());
+      $DB->query($query) or die($DB->error());
+
+      if ($_SESSION['PLUGIN_RT_VERSION'] > '1.5.3'){
+         // Vérifier si les colonnes existent déjà
+         $columns = $DB->query("SHOW COLUMNS FROM `$table`")->fetch_all(MYSQLI_ASSOC);
+
+         // Liste des colonnes à vérifier
+         $required_columns = [
+            'ORS_API_KEY'
+         ];
+
+         // Liste pour les colonnes manquantes
+         $missing_columns = array_diff($required_columns, array_column($columns, 'Field'));
+
+         if (!empty($missing_columns)) {
+            $query= "ALTER TABLE $table
+               ADD COLUMN `ORS_API_KEY` TEXT DEFAULT NULL;";
+            $DB->query($query) or die($DB->error());
+         }
+      }
    }
 
    static function uninstall(Migration $migration)

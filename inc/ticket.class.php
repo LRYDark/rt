@@ -10,10 +10,6 @@ class PluginRtTicket extends CommonDBTM {
    public static $rightname = 'ticket';
    public  static  $EntitieAddress = 0 ;
 
-   static function getIcon() {
-      return "fa-solid fa-car";
-   }
-
    static function getTypeName($nb = 0) { // voir doc glpi 
       if(Session::haveRight("plugin_rt_rt", READ)){
          return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
@@ -255,7 +251,7 @@ class PluginRtTicket extends CommonDBTM {
                }
 
                $id_entities = $data['entities_id'];
-               $rt_entity = $DB->doQuery("SELECT completename FROM `glpi_entities` WHERE id= $id_entities")->fetch_object();
+               $rt_entity = $DB->query("SELECT completename FROM `glpi_entities` WHERE id= $id_entities")->fetch_object();
 
                $out .= "<td class='center'>";
                $out .= $data['tasks_id'];
@@ -385,7 +381,7 @@ class PluginRtTicket extends CommonDBTM {
                         if (!$item->isNewItem()) { //si new ticket 
                            $id_tasks   = $item->getID();
                            $table      = self::getTable();
-                           $result     = $DB->doQuery("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
+                           $result     = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
 
                            if(!empty($result->routetime)){
                               $value = $result->routetime * 60;
@@ -439,7 +435,7 @@ class PluginRtTicket extends CommonDBTM {
             $quantity = $item->input['routetime_quantity']/60;
          }
 
-         $result = $DB->doQuery("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
+         $result = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
 
          if ($item->input['routetime_quantity']/60 != $result->routetime){
             if (!$item->isNewItem()){
@@ -449,7 +445,7 @@ class PluginRtTicket extends CommonDBTM {
                      $OldTime = str_replace(":", "h", gmdate("H:i",$result->routetime*60));    
                      $NewTime = str_replace(":", "h", gmdate("H:i",$quantity*60)); 
 
-                     if($DB->doQuery("UPDATE $table SET routetime = $quantity WHERE tasks_id = $id_tasks")) { // affichage de la pop up d'information ou erreur lors de la modif
+                     if($DB->query("UPDATE $table SET routetime = $quantity WHERE tasks_id = $id_tasks")) { // affichage de la pop up d'information ou erreur lors de la modif
                         Session::addMessageAfterRedirect(
                            __('Temps de trajet modifié : '.$OldTime." -> ".$NewTime, 'rt'),
                            true,
@@ -466,7 +462,7 @@ class PluginRtTicket extends CommonDBTM {
                }else{
                   $rt_ticket = new self();
                   $TaskId = $item->fields['tickets_id'];
-                  $result = $DB->doQuery("SELECT entities_id FROM glpi_tickets WHERE id = $TaskId")->fetch_object();
+                  $result = $DB->query("SELECT entities_id FROM glpi_tickets WHERE id = $TaskId")->fetch_object();
 
                   if(!empty($result->entities_id)){ // vérification de la requete (variable vide ou pas)
                      $EntityId = $result->entities_id;
@@ -562,11 +558,11 @@ class PluginRtTicket extends CommonDBTM {
                   $table = self::getTable();
                   $idticket = $ticket->getID();
 
-                  $result = $DB->doQuery("SELECT glpi_tickettasks.id FROM glpi_tickettasks INNER JOIN $table
+                  $result = $DB->query("SELECT glpi_tickettasks.id FROM glpi_tickettasks INNER JOIN $table
                   ON glpi_tickettasks.date = $table.date_creation WHERE $table.tasks_id = $rand AND glpi_tickettasks.tickets_id = $idticket")->fetch_object();
 
-                     if(!$DB->doQuery("UPDATE $table SET tasks_id=$result->id WHERE tasks_id=$rand") || empty($result->id)){
-                        $DB->doQuery("DELETE FROM $table WHERE tasks_id=$rand");
+                     if(!$DB->query("UPDATE $table SET tasks_id=$result->id WHERE tasks_id=$rand") || empty($result->id)){
+                        $DB->query("DELETE FROM $table WHERE tasks_id=$rand");
                            Session::addMessageAfterRedirect(
                               __("Erreur lors de l'ajout du temps trajet", 'rt'),
                               true,
@@ -605,7 +601,7 @@ class PluginRtTicket extends CommonDBTM {
          case 'TicketTask':
             $task_id    = $item->getID();
             $table      = self::getTable();
-            $result     = $DB->doQuery("SELECT routetime FROM $table WHERE tasks_id = $task_id")->fetch_object();
+            $result     = $DB->query("SELECT routetime FROM $table WHERE tasks_id = $task_id")->fetch_object();
 
             if(!empty($result->routetime)){
                $time = $result->routetime;
@@ -728,25 +724,29 @@ class PluginRtTicket extends CommonDBTM {
                echo '</div>';
                echo '</div>';
 
-               //$entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid; margin-left: -103px;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter</button></div>";
-               $entitie = "<div class='d-flex align-items-start'><div class='flex-grow-1'></div><a href='#' id='btnAjouterDemandeur' class='btn btn-sm btn-outline-secondary ms-2' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='ti ti-plus'></i> <span>Ajouter</span></a></div>";
-
+               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid; margin-left: -103px;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter</button></div>";
                $script = <<<JAVASCRIPT
-                  function chState(element) {
-                     if(element.checked) 
-                        element.value = 'true'; 
-                     else
-                        element.value = 'false';
-                  }
-
+                  function chState(element)
+                     {
+                        if(element.checked) 
+                           element.value='true'; 
+                        else
+                           element.value='false';
+                     }
+                  // Affichage du bouton "Ajouter un demandeur" 
                   $(document).ready(function() {
+                     // Vérifier si le bouton existe déjà
                      var boutonExist = document.getElementById('btnAjouterDemandeur');
+                  
                      if (boutonExist === null) {
+                        // Ciblez le conteneur du champ Demandeur et enveloppez le label et le bouton dans un conteneur flex
                         var labelDemandeur = $(".accordion-actors .form-field").first().find("label");
                         labelDemandeur.wrap("<div class='d-flex align-items-center'></div>");
                         labelDemandeur.after("<div class='ms-auto'>{$entitie}</div>");
                      }
 
+                     //--------------------------------------
+                     // Action lors de l'ajout du demandeur
                      document.getElementById('submit').addEventListener('click', function() {
                         var lastname = document.getElementById('lastname').value;
                         var firstname = document.getElementById('firstname').value;
@@ -754,40 +754,20 @@ class PluginRtTicket extends CommonDBTM {
                         var phone = document.getElementById('phone').value;
                         var url = document.getElementById('url').value;
                         var checkbox = document.getElementById('mailto');
+
                         var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                         var entity_id = document.getElementById(id_element_select).value;
 
                         $.ajax({ 
                            type: "GET",
-                           url: url + "/front/traitement.php?lastname=" + encodeURIComponent(lastname) +
-                                 "&firstname=" + encodeURIComponent(firstname) +
-                                 "&mail=" + encodeURIComponent(mail) +
-                                 "&phone=" + encodeURIComponent(phone) +
-                                 "&entity_id=" + encodeURIComponent(entity_id) +
-                                 "&mailto=" + encodeURIComponent(checkbox.value),
-                           success: function(response) {
-                              $('#AddUser').modal('hide');
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + checkbox.value,
+                           success: function(rep) {
+                              $('#AddUser').modal('hide'); // Ferme le modal
+                              try {
+                                 var response = JSON.parse(rep); // Parsez la réponse JSON
 
-                              let html = "";
-
-                              if (response.success && response.success.length > 0) {
-                                 html += `<div class='alert alert-success'><ul>`;
-                                 response.success.forEach(function(msg) {
-                                    html += `<li>` + msg + `</li>`;
-                                 });
-                                 html += `</ul></div>`;
-                              }
-
-                              if (response.errors && response.errors.length > 0) {
-                                 html += `<div class='alert alert-danger'><ul>`;
-                                 response.errors.forEach(function(msg) {
-                                    html += `<li>` + msg + `</li>`;
-                                 });
-                                 html += `</ul></div>`;
-                              }
-
-                              if (response.data) {
-                                 html += `
+                                 // Créez un contenu pour afficher le message avec le mot de passe masqué
+                                 var message = response.success + `
                                     <p style="margin-top: 25px;">
                                        <strong>Identifiant créé :</strong> 
                                        <span id="userField">********</span></br>
@@ -796,75 +776,14 @@ class PluginRtTicket extends CommonDBTM {
                                     </p>
                                     <button id="togglePassword" class="btn btn-secondary">Voir mot de passe</button>
                                  `;
-                              }
 
-                              glpi_html_dialog({
-                                 title: 'Résultat',
-                                 body: html,
-                                 buttons: [
-                                    {
-                                       text: "Fermer",
-                                       click: function() {
-                                          $(this).dialog("close");
-                                       }
-                                    }
-                                 ]
-                              });
-
-                              if (response.data) {
-                                 $('#userField').text(response.data.user);
-                                 $('#togglePassword').on('click', function () {
-                                    var field = $('#passwordField');
-                                    if (field.text() === '********') {
-                                       field.text(response.data.password);
-                                       $(this).text('Masquer mot de passe');
-                                    } else {
-                                       field.text('********');
-                                       $(this).text('Voir mot de passe');
-                                    }
-                                 });
-                              }
-                           },
-                           error: function(err) {
-                              $('#AddUser').modal('hide');
-                              try {
-                                 var errorResponse = JSON.parse(err.responseText);
-                                 let html = "";
-
-                                 if (errorResponse.success && errorResponse.success.length > 0) {
-                                    html += `<div class='alert alert-success'><ul>`;
-                                    errorResponse.success.forEach(function(msg) {
-                                       html += `<li>` + msg + `</li>`;
-                                    });
-                                    html += `</ul></div>`;
-                                 }
-
-                                 if (errorResponse.errors && errorResponse.errors.length > 0) {
-                                    html += `<div class='alert alert-danger'><ul>`;
-                                    errorResponse.errors.forEach(function(msg) {
-                                       html += `<li>` + msg + `</li>`;
-                                    });
-                                    html += `</ul></div>`;
-                                 }
-
-                                 if (errorResponse.data) {
-                                    html += `
-                                       <p style="margin-top: 25px;">
-                                          <strong>Identifiant créé :</strong> 
-                                          <span id="userField">********</span></br>
-                                          <strong>Mot de passe temporaire créé :</strong> 
-                                          <span id="passwordField">********</span>
-                                       </p>
-                                       <button id="togglePassword" class="btn btn-secondary">Voir mot de passe</button>
-                                    `;
-                                 }
-
+                                 // Utilisez `glpi_html_dialog` pour afficher la modale
                                  glpi_html_dialog({
-                                    title: 'Résultat',
-                                    body: html,
+                                    title: 'Information',
+                                    body: message,
                                     buttons: [
                                        {
-                                          text: "Fermer",
+                                          text: "OK",
                                           click: function() {
                                              $(this).dialog("close");
                                           }
@@ -872,27 +791,39 @@ class PluginRtTicket extends CommonDBTM {
                                     ]
                                  });
 
-                                 if (errorResponse.data) {
-                                    $('#userField').text(errorResponse.data.user);
-                                    $('#togglePassword').on('click', function () {
-                                       var field = $('#passwordField');
-                                       if (field.text() === '********') {
-                                          field.text(errorResponse.data.password);
-                                          $(this).text('Masquer mot de passe');
-                                       } else {
-                                          field.text('********');
-                                          $(this).text('Voir mot de passe');
-                                       }
-                                    });
-                                 }
+                                 $('#userField').text(response.user);
 
+                                 // Ajouter un gestionnaire d'événements pour le bouton "Voir mot de passe"
+                                 $('#togglePassword').on('click', function() {
+                                    var passwordField = $('#passwordField');
+                                    if (passwordField.text() === '********') {
+                                       passwordField.text(response.password);
+                                       $(this).text('Masquer mot de passe');
+                                    } else {
+                                       passwordField.text('********');
+                                       $(this).text('Voir mot de passe');
+                                    }
+                                 });
+
+                              } catch (e) {
+                                 // Affichez une erreur si la réponse ne peut pas être analysée
+                                 alert("Erreur lors de la gestion : " + e.message);
+                              }
+                           },
+                           error: function(err) {
+                              $('#AddUser').modal('hide'); // Ferme le modal
+                              try {
+                                 var errorResponse = JSON.parse(err.responseText);// Récupérez le texte de la réponse
+                                 errorMessage = errorResponse.error; // Utilisez uniquement le message d'erreur
+                                 alert(errorMessage);   // Affichez le message d'erreur propre                                 
                               } catch (e) {
                                  alert("Erreur lors de la gestion : " + e.message);
                               }
                            }
-                        });
+                        }); 
                      });
                   });
+                  //--------------------------------------
                JAVASCRIPT;
 
             echo Html::scriptBlock($script);
@@ -910,7 +841,7 @@ class PluginRtTicket extends CommonDBTM {
 
          if(Session::haveRight("plugin_rt_affichage", READ)){
 
-            $result = $DB->doQuery("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
+            $result = $DB->query("SELECT glpi_entities.id, address, postcode, town, country, comment FROM glpi_entities INNER JOIN glpi_tickets ON glpi_entities.id = glpi_tickets.entities_id WHERE glpi_tickets.id = $ticketId")->fetch_object();
 
                $complement = "";
                   if (!empty($result->comment))$complement = $result->comment;
@@ -930,8 +861,9 @@ class PluginRtTicket extends CommonDBTM {
                   $address = preg_replace("# {2,}#"," ",preg_replace("#(\r\n|\n\r|\n|\r)#"," ",$address)).'.';
                }
 
-               // verification des variables + affichage des infos de l'entité avec création d'un liens de recherche, filtré en fonction de l'entité.
-            if (!empty($complement) || !empty($address)){
+
+            // verification des variables + affichage des infos de l'entité avec création d'un liens de recherche, filtré en fonction de l'entité.
+            /*if (!empty($complement) || !empty($address)){
             $value = "<td><a href=ticket.php?is_deleted=0&as_map=0&browse=0&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals&criteria[0][value]=$result->id&itemtype=Ticket&start=0&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c&sort[]=19&order[]=DESC'> $complement $address </a></td>"; 
             $entitie = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> $value </span>";
                   $script = <<<JAVASCRIPT
@@ -940,12 +872,59 @@ class PluginRtTicket extends CommonDBTM {
                      });
                   JAVASCRIPT;
                echo Html::scriptBlock($script);
+            }*/
+            include GLPI_ROOT . '/plugins/rt/front/maps.form.php';
+
+            if (!empty($complement) || !empty($address)) {
+
+               // 1) Construire la destination texte (utilisée par le modal ORS)
+               $destination_text = trim($complement . ' ' . $address);
+
+               // 2) Bouton Navigation (compact, inline)
+               $navBtn = sprintf(
+                  '<button type="button" class="btn btn-link btn-sm p-0 js-open-route" ' .
+                  'data-dest="%s" title="%s" ' .
+                  'style="display:inline-block; vertical-align:middle; margin-left:6px">' .
+                  '<i class="fa-solid fa-map-location-dot fa-lg"></i>' .
+                  '</button>',
+                  htmlspecialchars($destination_text, ENT_QUOTES, 'UTF-8'),
+                  __('Itinéraire (ORS)')
+               );
+
+               // 3) Lien + bouton sur UNE SEULE LIGNE via inline-flex
+               $inline = 
+                  '<span class="address-inline" '.
+                  'style="display:inline-flex; align-items:baseline; gap:6px; white-space:normal;">'
+                  . "<a href='ticket.php?is_deleted=0&as_map=0&browse=0"
+                  . "&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals"
+                  . "&criteria[0][value]=$result->id&itemtype=Ticket&start=0"
+                  . "&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c"
+                  . "&sort[]=19&order[]=DESC'>"
+                  . htmlspecialchars($complement . ' ' . $address, ENT_QUOTES, 'UTF-8')
+                  . "</a>"
+                  . $navBtn
+                  . '</span>';
+
+               // 4) Badge GLPI propre (sans row/d-flex qui cassent la ligne)
+               $entitie = "<span class='glpi-badge form-field mb-2' style='margin-top:3px; display:block'>"
+                        . $inline
+                        . "</span>";
+
+               // 5) Injection
+               $entitie_js = json_encode($entitie, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+               $script = <<<JAVASCRIPT
+                  $(document).ready(function() {
+                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append($entitie_js);
+                  });
+               JAVASCRIPT;
+
+               echo Html::scriptBlock($script);
             }
-            
+
             // Affichage du temps total du ticket
             $config = new PluginRtConfig();
             if ($config->fields['showtime'] == 1){
-               $result_total_task   = $DB->doQuery("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
+               $result_total_task   = $DB->query("SELECT SUM(actiontime) as TotalTask from glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
                if(!empty($result_total_task->TotalTask)){ // recupération du temps total des taches
 
                   $result_total_min_task = $result_total_task->TotalTask/60;
@@ -958,7 +937,7 @@ class PluginRtTicket extends CommonDBTM {
                   $result_total_task = 'Aucune durée';
                }
                
-               $result_total_trajet = $DB->doQuery("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
+               $result_total_trajet = $DB->query("SELECT SUM(routetime) as TotalTrajet from glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
                if(!empty($result_total_trajet->TotalTrajet)){// recupération du temps total des trajet
 
                   $result_total_min_trajet = $result_total_trajet->TotalTrajet;
@@ -1078,25 +1057,29 @@ class PluginRtTicket extends CommonDBTM {
                echo '</div>';
                echo '</div>';
 
-               //$entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid; margin-left: -103px;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter</button></div>";
-               $entitie = "<div class='d-flex align-items-start'><div class='flex-grow-1'></div><a href='#' id='btnAjouterDemandeur' class='btn btn-sm btn-outline-secondary ms-2' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='ti ti-plus'></i> <span>Ajouter</span></a></div>";
-
+               $entitie = "<div class='d-grid gap-2 d-md-block'><button id='btnAjouterDemandeur'type='button' style='border: 1px solid; margin-left: -103px;' class='btn-sm btn-outline-secondary' data-bs-toggle='modal' data-bs-target='#AddUser'><i class='fas fa-plus'></i> Ajouter</button></div>";
                $script = <<<JAVASCRIPT
-                  function chState(element) {
-                     if(element.checked) 
-                        element.value = 'true'; 
-                     else
-                        element.value = 'false';
-                  }
-
+                  function chState(element)
+                     {
+                        if(element.checked) 
+                           element.value='true'; 
+                        else
+                           element.value='false';
+                     }
+                  // Affichage du bouton "Ajouter un demandeur" 
                   $(document).ready(function() {
+                     // Vérifier si le bouton existe déjà
                      var boutonExist = document.getElementById('btnAjouterDemandeur');
+                  
                      if (boutonExist === null) {
+                        // Ciblez le conteneur du champ Demandeur et enveloppez le label et le bouton dans un conteneur flex
                         var labelDemandeur = $(".accordion-actors .form-field").first().find("label");
                         labelDemandeur.wrap("<div class='d-flex align-items-center'></div>");
                         labelDemandeur.after("<div class='ms-auto'>{$entitie}</div>");
                      }
 
+                     //--------------------------------------
+                     // Action lors de l'ajout du demandeur
                      document.getElementById('submit').addEventListener('click', function() {
                         var lastname = document.getElementById('lastname').value;
                         var firstname = document.getElementById('firstname').value;
@@ -1104,40 +1087,20 @@ class PluginRtTicket extends CommonDBTM {
                         var phone = document.getElementById('phone').value;
                         var url = document.getElementById('url').value;
                         var checkbox = document.getElementById('mailto');
+
                         var id_element_select = document.querySelector('[name="add_user_for_entities_id"]').id;
                         var entity_id = document.getElementById(id_element_select).value;
 
                         $.ajax({ 
                            type: "GET",
-                           url: url + "/front/traitement.php?lastname=" + encodeURIComponent(lastname) +
-                                 "&firstname=" + encodeURIComponent(firstname) +
-                                 "&mail=" + encodeURIComponent(mail) +
-                                 "&phone=" + encodeURIComponent(phone) +
-                                 "&entity_id=" + encodeURIComponent(entity_id) +
-                                 "&mailto=" + encodeURIComponent(checkbox.value),
-                           success: function(response) {
-                              $('#AddUser').modal('hide');
+                           url: url + "/front/traitement.php?lastname=" + lastname + "&firstname=" + firstname + "&mail=" + mail + "&phone=" + phone + "&entity_id=" + entity_id + "&mailto=" + checkbox.value,
+                           success: function(rep) {
+                              $('#AddUser').modal('hide'); // Ferme le modal
+                              try {
+                                 var response = JSON.parse(rep); // Parsez la réponse JSON
 
-                              let html = "";
-
-                              if (response.success && response.success.length > 0) {
-                                 html += `<div class='alert alert-success'><ul>`;
-                                 response.success.forEach(function(msg) {
-                                    html += `<li>` + msg + `</li>`;
-                                 });
-                                 html += `</ul></div>`;
-                              }
-
-                              if (response.errors && response.errors.length > 0) {
-                                 html += `<div class='alert alert-danger'><ul>`;
-                                 response.errors.forEach(function(msg) {
-                                    html += `<li>` + msg + `</li>`;
-                                 });
-                                 html += `</ul></div>`;
-                              }
-
-                              if (response.data) {
-                                 html += `
+                                 // Créez un contenu pour afficher le message avec le mot de passe masqué
+                                 var message = response.success + `
                                     <p style="margin-top: 25px;">
                                        <strong>Identifiant créé :</strong> 
                                        <span id="userField">********</span></br>
@@ -1146,75 +1109,14 @@ class PluginRtTicket extends CommonDBTM {
                                     </p>
                                     <button id="togglePassword" class="btn btn-secondary">Voir mot de passe</button>
                                  `;
-                              }
 
-                              glpi_html_dialog({
-                                 title: 'Résultat',
-                                 body: html,
-                                 buttons: [
-                                    {
-                                       text: "Fermer",
-                                       click: function() {
-                                          $(this).dialog("close");
-                                       }
-                                    }
-                                 ]
-                              });
-
-                              if (response.data) {
-                                 $('#userField').text(response.data.user);
-                                 $('#togglePassword').on('click', function () {
-                                    var field = $('#passwordField');
-                                    if (field.text() === '********') {
-                                       field.text(response.data.password);
-                                       $(this).text('Masquer mot de passe');
-                                    } else {
-                                       field.text('********');
-                                       $(this).text('Voir mot de passe');
-                                    }
-                                 });
-                              }
-                           },
-                           error: function(err) {
-                              $('#AddUser').modal('hide');
-                              try {
-                                 var errorResponse = JSON.parse(err.responseText);
-                                 let html = "";
-
-                                 if (errorResponse.success && errorResponse.success.length > 0) {
-                                    html += `<div class='alert alert-success'><ul>`;
-                                    errorResponse.success.forEach(function(msg) {
-                                       html += `<li>` + msg + `</li>`;
-                                    });
-                                    html += `</ul></div>`;
-                                 }
-
-                                 if (errorResponse.errors && errorResponse.errors.length > 0) {
-                                    html += `<div class='alert alert-danger'><ul>`;
-                                    errorResponse.errors.forEach(function(msg) {
-                                       html += `<li>` + msg + `</li>`;
-                                    });
-                                    html += `</ul></div>`;
-                                 }
-
-                                 if (errorResponse.data) {
-                                    html += `
-                                       <p style="margin-top: 25px;">
-                                          <strong>Identifiant créé :</strong> 
-                                          <span id="userField">********</span></br>
-                                          <strong>Mot de passe temporaire créé :</strong> 
-                                          <span id="passwordField">********</span>
-                                       </p>
-                                       <button id="togglePassword" class="btn btn-secondary">Voir mot de passe</button>
-                                    `;
-                                 }
-
+                                 // Utilisez `glpi_html_dialog` pour afficher la modale
                                  glpi_html_dialog({
-                                    title: 'Résultat',
-                                    body: html,
+                                    title: 'Information',
+                                    body: message,
                                     buttons: [
                                        {
-                                          text: "Fermer",
+                                          text: "OK",
                                           click: function() {
                                              $(this).dialog("close");
                                           }
@@ -1222,27 +1124,39 @@ class PluginRtTicket extends CommonDBTM {
                                     ]
                                  });
 
-                                 if (errorResponse.data) {
-                                    $('#userField').text(errorResponse.data.user);
-                                    $('#togglePassword').on('click', function () {
-                                       var field = $('#passwordField');
-                                       if (field.text() === '********') {
-                                          field.text(errorResponse.data.password);
-                                          $(this).text('Masquer mot de passe');
-                                       } else {
-                                          field.text('********');
-                                          $(this).text('Voir mot de passe');
-                                       }
-                                    });
-                                 }
+                                 $('#userField').text(response.user);
 
+                                 // Ajouter un gestionnaire d'événements pour le bouton "Voir mot de passe"
+                                 $('#togglePassword').on('click', function() {
+                                    var passwordField = $('#passwordField');
+                                    if (passwordField.text() === '********') {
+                                       passwordField.text(response.password);
+                                       $(this).text('Masquer mot de passe');
+                                    } else {
+                                       passwordField.text('********');
+                                       $(this).text('Voir mot de passe');
+                                    }
+                                 });
+
+                              } catch (e) {
+                                 // Affichez une erreur si la réponse ne peut pas être analysée
+                                 alert("Erreur lors de la gestion : " + e.message);
+                              }
+                           },
+                           error: function(err) {
+                              $('#AddUser').modal('hide'); // Ferme le modal
+                              try {
+                                 var errorResponse = JSON.parse(err.responseText);// Récupérez le texte de la réponse
+                                 errorMessage = errorResponse.error; // Utilisez uniquement le message d'erreur
+                                 alert(errorMessage);   // Affichez le message d'erreur propre                                 
                               } catch (e) {
                                  alert("Erreur lors de la gestion : " + e.message);
                               }
                            }
-                        });
+                        }); 
                      });
                   });
+                  //--------------------------------------
                JAVASCRIPT;
 
             echo Html::scriptBlock($script);
@@ -1307,7 +1221,7 @@ class PluginRtTicket extends CommonDBTM {
                      KEY `routetime` (`routetime`),
                      KEY `users_id` (`users_id`)
                   ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
-         $DB->doQuery($query) or die($DB->error());
+         $DB->query($query) or die($DB->error());
       } else {
 
          // Fix #1 in 1.0.1 : change tinyint to int for tickets_id
