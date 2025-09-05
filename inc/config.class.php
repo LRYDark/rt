@@ -113,6 +113,12 @@ class PluginRtConfig extends CommonDBTM
          echo "</td>";
       echo "</tr>";
 
+      echo "<tr class='tab_bg_1'>";
+         echo "<td>" . __("Token ORS Maps.", "rt") . "</td><td>";
+            echo Html::input('ORS_API_KEY', ['value' => $config->ORS_API_KEY(), 'size' => 120]);// bouton configuration du bas de page line 1
+         echo "</td>";
+      echo "</tr>";
+
       $config->showFormHeader(['colspan' => 4]);
       echo "<tr><th colspan='2'>" . __('Configuration mail', 'rp') . "</th></tr>";
 
@@ -194,6 +200,10 @@ class PluginRtConfig extends CommonDBTM
    function mail()
    {
       return ($this->fields['mail'] ? true : false);
+   }
+   function ORS_API_KEY()
+   {
+      return ($this->fields['ORS_API_KEY']);
    }
    // return fonction
 
@@ -534,6 +544,25 @@ class PluginRtConfig extends CommonDBTM
 
       $query= "UPDATE glpi_plugin_rt_configs SET gabarit = $ID->id WHERE id=1;";
       $DB->doQuery($query) or die($DB->error());
+
+      if ($_SESSION['PLUGIN_RT_VERSION'] > '1.5.3'){
+         // Vérifier si les colonnes existent déjà
+         $columns = $DB->doQuery("SHOW COLUMNS FROM `$table`")->fetch_all(MYSQLI_ASSOC);
+
+         // Liste des colonnes à vérifier
+         $required_columns = [
+            'ORS_API_KEY'
+         ];
+
+         // Liste pour les colonnes manquantes
+         $missing_columns = array_diff($required_columns, array_column($columns, 'Field'));
+
+         if (!empty($missing_columns)) {
+            $query= "ALTER TABLE $table
+               ADD COLUMN `ORS_API_KEY` TEXT DEFAULT NULL;";
+            $DB->doQuery($query) or die($DB->error());
+         }
+      }
    }
 
    static function uninstall(Migration $migration)
