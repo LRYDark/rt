@@ -80,61 +80,157 @@ if ($UserId = $user->add($InputUser)) {
     if ($usermail->add($InputUserMail)) {
         $cleanedPassword = cleanString($entities_name->name . $lastname);
 
-        if ($mailto == "true") {
+        if ($mailto === "true") {
+            global $DB, $CFG_GLPI;
+
+            // --- Balises ---
             $Balises = [
-                ['Balise' => '##id.user##',        'Value' => $username],
-                ['Balise' => '##user.password##',  'Value' => $cleanedPassword],
-                ['Balise' => '##user.lastname##',  'Value' => $lastname],
-                ['Balise' => '##user.firstname##', 'Value' => $firstname]
+                ['Balise' => '##id.user##',        'Value' => (string)$username],
+                ['Balise' => '##user.password##',  'Value' => (string)$cleanedPassword],
+                ['Balise' => '##user.lastname##',  'Value' => (string)$lastname],
+                ['Balise' => '##user.firstname##', 'Value' => (string)$firstname],
             ];
 
-            function balise($corps){
-                global $Balises;
-                foreach($Balises as $balise) {
-                    $corps = str_replace($balise['Balise'], $balise['Value'], $corps);
+            if (!function_exists('balise')) {
+                function balise($corps, $Balises = []) {
+                    if ($corps === null) return '';
+                    if (!isset($Balises) || !is_iterable($Balises)) return (string)$corps;
+                    foreach ($Balises as $b) {
+                        $tag = isset($b['Balise']) ? (string)$b['Balise'] : '';
+                        if ($tag === '') continue;
+                        $val = array_key_exists('Value', $b) ? (string)$b['Value'] : '';
+                        $corps = str_replace($tag, $val, (string)$corps);
+                    }
+                    return $corps;
                 }
-                return $corps;
             }
 
-            $mmail  = new GLPIMailer();
-            $config = PluginRtConfig::getInstance();
-
-            $notificationtemplates_id = $config->fields['gabarit'];
-            $NotifMailTemplate = $DB->doQuery("SELECT * FROM glpi_notificationtemplatetranslations WHERE notificationtemplates_id=$notificationtemplates_id")->fetch_object();
-
-            if ($NotifMailTemplate) {
-                $BodyHtml = html_entity_decode($NotifMailTemplate->content_html, ENT_QUOTES, 'UTF-8');
-                $BodyText = html_entity_decode($NotifMailTemplate->content_text, ENT_QUOTES, 'UTF-8');
-            } else {
-                $errors[] = "Erreur !! Aucun gabarit rattaché, impossible d'envoyer un e-mail.";
+            if (!function_exists('normalize_eols')) {
+                function normalize_eols(string $s): string {
+                    $s = str_replace("\0", '', $s);
+                    return preg_replace("/\r\n|\r|\n/u", "\r\n", $s);
+                }
             }
 
-            $footer = $DB->doQuery("SELECT value FROM glpi_configs WHERE name = 'mailing_signature'")->fetch_object();
-            $footer = !empty($footer->value) ? html_entity_decode($footer->value, ENT_QUOTES, 'UTF-8') : '';
-
-            $mmail->AddCustomHeader("X-Auto-Response-Suppress: OOF, DR, NDR, RN, NRN");
-            $from_email = !empty($CFG_GLPI["from_email"]) ? $CFG_GLPI["from_email"] : $CFG_GLPI["admin_email"];
-            $from_name  = $CFG_GLPI["from_email_name"] ?? $CFG_GLPI["admin_email_name"] ?? 'GLPI';
-
-            if (!filter_var($from_email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Adresse e-mail expéditeur invalide. Vérifiez la configuration GLPI.";
+            // --- Validation destinataire ---
+            $mail = trim((string)($mail ?? ''));
+            if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+                $errors[]  = "Adresse e-mail destinataire invalide : $mail";
                 $success[] = "Demandeur ajouté avec succès (mais sans envoi d'e-mail)";
             } else {
-                $mmail->SetFrom($from_email, $from_name, false);
-                $mmail->AddAddress($mail);
-                $mmail->isHTML(true);
-                $mmail->Subject = balise($NotifMailTemplate->subject);
-                $mmail->Body = GLPIMailer::normalizeBreaks(balise($BodyHtml)) . $footer;
-                $mmail->AltBody = GLPIMailer::normalizeBreaks(balise($BodyText)) . $footer;
 
-                if ($mmail->send()) {
-                    $success[] = "Demandeur ajouté avec succès, informations envoyées par e-mail à : $mail";
+                // --- Récupération du gabarit (avec fallback de langue) ---
+                $config = PluginRtConfig::getInstance();
+                $notificationtemplates_id = (int)($config->fields['gabarit'] ?? 0);
+
+                $Subject = $BodyHtml = $BodyText = '';
+
+                if ($notificationtemplates_id > 0) {
+                    $curLang = $_SESSION['glpilanguage'] ?? ($CFG_GLPI['language'] ?? 'fr_FR');
+                    $langs   = array_values(array_unique([$curLang, substr($curLang, 0, 2), '']));
+
+                    // ORDER BY FIELD(language, curLang, short, '')
+                    $order = new \QueryExpression(
+                        "FIELD(language,'" . implode("','", array_map('addslashes', $langs)) . "')"
+                    );
+
+                    $row = $DB->request([
+                        'SELECT' => ['subject','content_text','content_html','language'],
+                        'FROM'   => 'glpi_notificationtemplatetranslations',
+                        'WHERE'  => [
+                            'notificationtemplates_id' => $notificationtemplates_id,
+                            'language'                 => $langs, // IN (...)
+                        ],
+                        'ORDER'  => [$order],
+                        'LIMIT'  => 1
+                    ])->current();
+
+                    if (!is_array($row)) {
+                        // Ultime recours : sans filtre de langue
+                        $row = $DB->request([
+                            'SELECT' => ['subject','content_text','content_html','language'],
+                            'FROM'   => 'glpi_notificationtemplatetranslations',
+                            'WHERE'  => ['notificationtemplates_id' => $notificationtemplates_id],
+                            'LIMIT'  => 1
+                        ])->current();
+                    }
+
+                    if (is_array($row)) {
+                        $Subject  = (string)($row['subject'] ?? '');
+                        $BodyText = isset($row['content_text'])
+                                    ? html_entity_decode((string)$row['content_text'], ENT_QUOTES, 'UTF-8') : '';
+                        $BodyHtml = isset($row['content_html'])
+                                    ? html_entity_decode((string)$row['content_html'], ENT_QUOTES, 'UTF-8') : '';
+                    } else {
+                        $errors[]  = "Erreur : aucun gabarit valide trouvé, e-mail non envoyé.";
+                        $success[] = "Demandeur ajouté avec succès (mais sans envoi d'e-mail)";
+                    }
                 } else {
-                    $success[] = "Demandeur ajouté avec succès";
-                    $errors[] = "Erreur lors de l'envoi du mail à : $mail";
+                    $errors[]  = "Erreur : aucun gabarit rattaché dans la configuration.";
+                    $success[] = "Demandeur ajouté avec succès (mais sans envoi d'e-mail)";
                 }
 
-                $mmail->ClearAddresses();
+                if (empty($errors) || (count($errors) && ($Subject.$BodyHtml.$BodyText) !== '')) {
+                    // --- Footer (signature) ---
+                    $footerVal = '';
+                    $cfgRow = $DB->request([
+                        'SELECT' => ['value'],
+                        'FROM'   => 'glpi_configs',
+                        'WHERE'  => ['name' => 'mailing_signature'],
+                        'LIMIT'  => 1
+                    ])->current();
+                    if (is_array($cfgRow) && !empty($cfgRow['value'])) {
+                        $footerVal = html_entity_decode((string)$cfgRow['value'], ENT_QUOTES, 'UTF-8');
+                    }
+
+                    // --- Construction e-mail (GLPIMailer / Symfony Mailer) ---
+                    $mmail = new GLPIMailer();
+                    $mmail->addCustomHeader("X-Auto-Response-Suppress: OOF, DR, NDR, RN, NRN");
+
+                    // From sécurisé (fallback)
+                    $fromEmail = !empty($CFG_GLPI['from_email'])
+                        ? (string)$CFG_GLPI['from_email']
+                        : (!empty($CFG_GLPI['admin_email']) ? (string)$CFG_GLPI['admin_email'] : 'no-reply@localhost');
+
+                    $fromName = $CFG_GLPI['from_email_name'] ?? $CFG_GLPI['admin_email_name'] ?? null;
+                    $fromName = (is_string($fromName) && $fromName !== '') ? $fromName : 'GLPI';
+
+                    $emailObj = $mmail->getEmail();
+                    $emailObj->from(new \Symfony\Component\Mime\Address($fromEmail, $fromName));
+                    $emailObj->to($mail); // pas de "name" pour éviter null
+
+                    // Sujet / Corps avec balises + normalisation EOL
+                    $Subject   = is_string($Subject)  ? $Subject  : '';
+                    $BodyHtml  = is_string($BodyHtml) ? $BodyHtml : '';
+                    $BodyText  = is_string($BodyText) ? $BodyText : '';
+                    $footerStr = is_string($footerVal) ? $footerVal : '';
+
+                    if ($Subject !== '') {
+                        $mmail->Subject = balise($Subject, $Balises);
+                    }
+
+                    $html = normalize_eols(balise($BodyHtml, $Balises));
+                    $txt  = normalize_eols(balise($BodyText, $Balises));
+
+                    if ($footerStr !== '') {
+                        $html .= "<br>" . $footerStr;
+                        $txt  .= "\r\n" . strip_tags($footerStr);
+                    }
+
+                    $mmail->Body    = $html;
+                    $mmail->AltBody = $txt;
+
+                    // Envoi
+                    if ($mmail->send()) {
+                        $success[] = "Demandeur ajouté avec succès, informations envoyées par e-mail à : $mail";
+                    } else {
+                        $success[] = "Demandeur ajouté avec succès";
+                        $errors[]  = "Erreur lors de l'envoi du mail à : $mail";
+                    }
+
+                    // Nettoyage
+                    $mmail->ClearAddresses();
+                }
             }
         } else {
             $success[] = "Demandeur ajouté avec succès";
