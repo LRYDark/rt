@@ -878,7 +878,7 @@ class PluginRtTicket extends CommonDBTM {
             if (!empty($complement) || !empty($address)) {
 
                // 1) Construire la destination texte (utilisée par le modal ORS)
-               $destination_text = trim($complement . ' ' . $address);
+               $destination_text = trim($address);
 
                // 2) Bouton Navigation (compact, inline)
                $navBtn = sprintf(
@@ -900,7 +900,7 @@ class PluginRtTicket extends CommonDBTM {
                   . "&criteria[0][value]=$result->id&itemtype=Ticket&start=0"
                   . "&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c"
                   . "&sort[]=19&order[]=DESC'>"
-                  . htmlspecialchars($complement . ' ' . $address, ENT_QUOTES, 'UTF-8')
+                  . htmlspecialchars(preg_replace('/<br\s*\/?>/i', ', ', $complement . $address), ENT_QUOTES, 'UTF-8')
                   . "</a>"
                   . $navBtn
                   . '</span>';
