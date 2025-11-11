@@ -1,5 +1,5 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.5.4'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.5.5'); // version du plugin
 $_SESSION['PLUGIN_RT_VERSION'] = PLUGIN_RT_VERSION;
 
 // Minimal GLPI version,

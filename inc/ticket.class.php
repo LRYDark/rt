@@ -999,7 +999,7 @@ class PluginRtTicket extends CommonDBTM {
                                                 Dropdown::show('Entity', [
                                                    'name' => 'add_user_for_entities_id',
                                                    'width'  => '80%',
-                                                   'value' => $result->id,
+                                                   'value'  => isset($result) ? $result->id : 0,
                                                 ]);                                   
                                           echo "</select>";
                                        echo "</td>";
