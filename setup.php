@@ -1,11 +1,11 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.6.0_beta4'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.6.1'); // version du plugin
 $_SESSION['PLUGIN_RT_VERSION'] = PLUGIN_RT_VERSION;
 
 // Minimal GLPI version,
 define("PLUGIN_RT_MIN_GLPI", "10.0.3");
 // Maximum GLPI version,
-define("PLUGIN_RT_MAX_GLPI", "11.0.1");
+define("PLUGIN_RT_MAX_GLPI", "11.2.0");
 
 define("PLUGIN_RT_WEBDIR", Plugin::getWebDir("rt"));
 define("PLUGIN_RT_DIR", Plugin::getPhpDir("rt"));
