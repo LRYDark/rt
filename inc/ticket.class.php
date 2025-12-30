@@ -15,27 +15,27 @@ class PluginRtTicket extends CommonDBTM {
    }
 
    static function getTypeName($nb = 0) { // voir doc glpi 
-      if(Session::haveRight("plugin_rt_rt", READ)){
-         return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
-      }
+      return _n('Temps de trajet', 'Temps de trajet', $nb, 'rt');
    }
    
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) { // voir doc glpi 
-      $config = new PluginRtConfig();
-      if ($config->fields['fromonglettrajet'] == 1){
+      if(Session::haveRight("plugin_rt_rt", READ)){
+         $config = new PluginRtConfig();
+         if ($config->fields['fromonglettrajet'] == 1){
 
-         $nb = self::countForItem($item);
-         switch ($item->getType()) {
-            case 'Ticket' :
-               if ($_SESSION['glpishow_count_on_tabs']) {
-                  return self::createTabEntry(self::getTypeName($nb), $nb);
-               } else {
+            $nb = self::countForItem($item);
+            switch ($item->getType()) {
+               case 'Ticket' :
+                  if ($_SESSION['glpishow_count_on_tabs']) {
+                     return self::createTabEntry(self::getTypeName($nb), $nb);
+                  } else {
+                     return self::getTypeName($nb);
+                  }
+               default :
                   return self::getTypeName($nb);
-               }
-            default :
-               return self::getTypeName($nb);
+            }
+            return '';
          }
-         return '';
       }
    }
 
