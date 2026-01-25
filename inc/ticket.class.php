@@ -907,22 +907,22 @@ class PluginRtTicket extends CommonDBTM {
                $navBtn = sprintf(
                   '<button type="button" class="btn btn-link btn-sm p-0 js-open-route" ' .
                   'data-dest="%s" title="%s" ' .
-                  'style="display:inline-block; vertical-align:middle; margin-left:6px">' .
+                  'style="display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;">' .
                   '<i class="fa-solid fa-map-location-dot fa-lg"></i>' .
                   '</button>',
                   htmlspecialchars($destination_text, ENT_QUOTES, 'UTF-8'),
                   __('Itinéraire (ORS)')
                );
 
-               // 3) Lien + bouton sur UNE SEULE LIGNE via inline-flex
+               // 3) Lien + bouton sur UNE SEULE LIGNE via flex
                $inline =
                   '<span class="address-inline" ' .
-                  'style="display:inline-flex; align-items:baseline; gap:6px; white-space:normal;">' .
+                  'style="display:flex; align-items:center; gap:6px;">' .
                      "<a href='ticket.php?is_deleted=0&as_map=0&browse=0" .
                      "&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals" .
                      "&criteria[0][value]=$result->id&itemtype=Ticket&start=0" .
                      "&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c" .
-                     "&sort[]=19&order[]=DESC'>" .
+                     "&sort[]=19&order[]=DESC' style='display:block; flex:1 1 auto; min-width:0; white-space:normal;'>" .
                      htmlspecialchars(preg_replace('/<br\s*\/?>/i', ', ', $complement . $address), ENT_QUOTES, 'UTF-8') .
                      "</a>" .
                      $navBtn .
@@ -941,7 +941,14 @@ class PluginRtTicket extends CommonDBTM {
                $entitie_js = json_encode($entitie, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                $script = <<<JAVASCRIPT
                   $(document).ready(function() {
-                     $("div.form-field.row.col-12.d-flex.align-items-center.mb-2").append($entitie_js);
+                     var \$target = $("div.form-field.row.col-12.d-flex.align-items-center.mb-2");
+                     var \$ent = $($entitie_js);
+                     \$target.after(\$ent);
+
+                     var \$addr = \$ent.find(".address-inline");
+                     var \$text = \$addr.find("a");
+                     \$ent.removeClass("align-items-start").addClass("align-items-center");
+                     \$addr.css("align-items", "center");
                   });
                JAVASCRIPT;
 
