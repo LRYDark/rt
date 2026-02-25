@@ -9,6 +9,7 @@ class PluginRtTicket extends CommonDBTM {
 
    public static $rightname = 'ticket';
    public  static  $EntitieAddress = 0 ;
+   private static $taskBadgeScriptHelperLoaded = false;
 
    static function getIcon() {
       return "fa-solid fa-car";
@@ -60,6 +61,39 @@ class PluginRtTicket extends CommonDBTM {
       }
    }
 
+   private static function ensureTaskBadgeScriptHelperLoaded(): void
+   {
+      if (self::$taskBadgeScriptHelperLoaded) {
+         return;
+      }
+
+      $script = <<<'JAVASCRIPT'
+         window.pluginRtAppendTaskBadge = window.pluginRtAppendTaskBadge || function(taskId, html) {
+            var appendBadge = function() {
+               $("div[data-itemtype='TicketTask'][data-items-id='" + taskId + "'] div.card-body div.timeline-header div.creator").append(html);
+            };
+
+            if (document.readyState === 'loading') {
+               $(appendBadge);
+            } else {
+               appendBadge();
+            }
+         };
+      JAVASCRIPT;
+
+      echo Html::scriptBlock($script);
+      self::$taskBadgeScriptHelperLoaded = true;
+   }
+
+   private static function appendTaskBadgeScript(int $taskId, string $iconHtml): void
+   {
+      self::ensureTaskBadgeScriptHelperLoaded();
+
+      $taskIdJson = json_encode((string)$taskId, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      $iconJson   = json_encode($iconHtml, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      echo Html::scriptBlock("window.pluginRtAppendTaskBadge($taskIdJson, $iconJson);");
+   }
+
    /**
     * Get all routes times for a ticket.
     *
@@ -70,7 +104,15 @@ class PluginRtTicket extends CommonDBTM {
       global $DB;
 
       $request = [
-         'SELECT' => '*',
+         'SELECT' => [
+            'id',
+            'tickets_id',
+            'tasks_id',
+            'entities_id',
+            'users_id',
+            'routetime',
+            'date_creation',
+         ],
          'FROM'   => self::getTable(),
          'WHERE'  => [
             'tickets_id' => $ID,
@@ -190,7 +232,27 @@ class PluginRtTicket extends CommonDBTM {
             $header_end .= "</tr>";
             $out.= $header_begin.$header_top.$header_end;
 
-            foreach (self::getAllForTicket($ID) as $data) {
+            $routes = self::getAllForTicket($ID);
+            $entity_ids = [];
+            foreach ($routes as $route_row) {
+               $entity_id = (int)($route_row['entities_id'] ?? 0);
+               if ($entity_id > 0) {
+                  $entity_ids[$entity_id] = $entity_id;
+               }
+            }
+            $entity_names = [];
+            if (!empty($entity_ids)) {
+               foreach ($DB->request([
+                  'SELECT' => ['id', 'completename'],
+                  'FROM'   => 'glpi_entities',
+                  'WHERE'  => ['id' => array_values($entity_ids)]
+               ]) as $entity_row) {
+                  $entity_names[(int)($entity_row['id'] ?? 0)] = (string)($entity_row['completename'] ?? '');
+               }
+            }
+            $showuserlink = Session::haveRight('user', READ) ? 1 : 0;
+
+            foreach ($routes as $data) {
 
                $out .= "<tr class='tab_bg_2'>";
                if(Session::haveRight("plugin_rt_rt", UPDATE) || Session::haveRight("plugin_rt_rt", PURGE)){
@@ -201,23 +263,18 @@ class PluginRtTicket extends CommonDBTM {
                   }
                }
 
-               $id_entities = $data['entities_id'];
-               $rt_entity = $DB->doQuery("SELECT completename FROM `glpi_entities` WHERE id= $id_entities")->fetch_object();
+               $id_entities = (int)($data['entities_id'] ?? 0);
+               $rt_entity_name = (string)($entity_names[$id_entities] ?? '');
 
                $out .= "<td class='center'>";
                $out .= $data['tasks_id'];
                $out .= "</td>";
                $out .= "<td width='40%' class='center'>";
-               $out .= $rt_entity->completename;
+               $out .= $rt_entity_name;
                $out .= "</td>";
                $out .= "<td class='center'>";
                $out .= Html::convDate($data["date_creation"]);
                $out .= "</td>";
-
-               $showuserlink = 0;
-               if (Session::haveRight('user', READ)) {
-                  $showuserlink = 1;
-               }
 
                $out .= "<td class='center'>";
                $out .= getUserName($data["users_id"], $showuserlink);
@@ -383,73 +440,81 @@ class PluginRtTicket extends CommonDBTM {
       if(Session::haveRight("plugin_rt_rt", UPDATE)){
          $table      = self::getTable();
          $id_tasks   = $item->getID();
-         $rt_ticket  = new self();
 
          if(!isset($item->input['routetime_quantity'])){
             $quantity = 0;
          }else{
-            $quantity = $item->input['routetime_quantity']/60;
+            $quantity = (int)($item->input['routetime_quantity']/60);
          }
 
-         $result = $DB->doQuery("SELECT routetime FROM $table WHERE tasks_id = $id_tasks")->fetch_object();
+         if ($item->isNewItem()) {
+            return;
+         }
 
-         if ($result && $item->input['routetime_quantity']/60 != $result->routetime) {
-            if (!$item->isNewItem()){
-               if(!empty($result->routetime) || $result->routetime == '0'){
-                  if($quantity != $result->routetime){
+         $resultQuery = $DB->doQuery("SELECT routetime FROM $table WHERE tasks_id = $id_tasks");
+         $result = $resultQuery ? $resultQuery->fetch_object() : null;
 
-                     $OldTime = str_replace(":", "h", gmdate("H:i",$result->routetime*60));    
-                     $NewTime = str_replace(":", "h", gmdate("H:i",$quantity*60)); 
-
-                     if($DB->doQuery("UPDATE $table SET routetime = $quantity WHERE tasks_id = $id_tasks")) { // affichage de la pop up d'information ou erreur lors de la modif
-                        Session::addMessageAfterRedirect(
-                           __('Temps de trajet modifié : '.$OldTime." -> ".$NewTime, 'rt'),
-                           true,
-                           INFO
-                        );
-                     }else{
-                        Session::addMessageAfterRedirect(
-                           __('Echec de la modification du temps de trajet', 'rt'),
-                           true,
-                           ERROR
-                        );
-                     }
-                  }
-               }else{
-                  $rt_ticket = new self();
-                  $TaskId = $item->fields['tickets_id'];
-                  $result = $DB->doQuery("SELECT entities_id FROM glpi_tickets WHERE id = $TaskId")->fetch_object();
-
-                  if(!empty($result->entities_id)){ // vérification de la requete (variable vide ou pas)
-                     $EntityId = $result->entities_id;
-                  }else{
-                     $EntityId = 0;
-                  }
-
-                  $input = [
-                     'tasks_id'      => $id_tasks,
-                     'tickets_id'    => $TaskId,
-                     'entities_id'   => $EntityId,
-                     'routetime'     => $quantity,
-                     'users_id'      => Session::getLoginUserID(),
-                  ]; // valeurs
-                  $NewTime = str_replace(":", "h", gmdate("H:i",$quantity*60)); 
-
-                  if($rt_ticket->add($input)) { // fonction d'add (ajout des valeur dans la table)
-                     Session::addMessageAfterRedirect( // pop up
-                        __('Temps de trajet ajouté -> '.$NewTime, 'rt'),
-                        true,
-                        INFO
-                     );
-                  }else{
-                     Session::addMessageAfterRedirect(
-                        __("Echec de l'ajout du temps de trajet", 'rt'),
-                        true,
-                        ERROR
-                     );
-                  }
-               }
+         if ($result) {
+            $oldQuantity = (int)($result->routetime ?? 0);
+            if ($quantity === $oldQuantity) {
+               return;
             }
+
+            $OldTime = str_replace(":", "h", gmdate("H:i",$oldQuantity*60));
+            $NewTime = str_replace(":", "h", gmdate("H:i",$quantity*60));
+
+            if($DB->doQuery("UPDATE $table SET routetime = $quantity WHERE tasks_id = $id_tasks")) { // affichage de la pop up d'information ou erreur lors de la modif
+               Session::addMessageAfterRedirect(
+                  __('Temps de trajet modifié : '.$OldTime." -> ".$NewTime, 'rt'),
+                  true,
+                  INFO
+               );
+            }else{
+               Session::addMessageAfterRedirect(
+                  __('Echec de la modification du temps de trajet', 'rt'),
+                  true,
+                  ERROR
+               );
+            }
+            return;
+         }
+
+         // Aucune ligne RT existante : on l'ajoute si un temps > 0 est renseigné lors de la modification.
+         if ($quantity <= 0) {
+            return;
+         }
+
+         $rt_ticket = new self();
+         $TaskId = (int)($item->fields['tickets_id'] ?? $item->input['tickets_id'] ?? 0);
+         if ($TaskId <= 0) {
+            return;
+         }
+
+         $ticketRes = $DB->doQuery("SELECT entities_id FROM glpi_tickets WHERE id = $TaskId");
+         $ticketRow = $ticketRes ? $ticketRes->fetch_object() : null;
+         $EntityId = (int)($ticketRow->entities_id ?? 0);
+
+         $input = [
+            'tasks_id'      => $id_tasks,
+            'tickets_id'    => $TaskId,
+            'entities_id'   => $EntityId,
+            'routetime'     => $quantity,
+            'users_id'      => Session::getLoginUserID(),
+         ]; // valeurs
+         $NewTime = str_replace(":", "h", gmdate("H:i",$quantity*60));
+
+         if($rt_ticket->add($input)) { // fonction d'add (ajout des valeur dans la table)
+            Session::addMessageAfterRedirect( // pop up
+               __('Temps de trajet ajouté -> '.$NewTime, 'rt'),
+               true,
+               INFO
+            );
+         }else{
+            Session::addMessageAfterRedirect(
+               __("Echec de l'ajout du temps de trajet", 'rt'),
+               true,
+               ERROR
+            );
          }
       }else{
          Session::addMessageAfterRedirect(
@@ -508,7 +573,7 @@ class PluginRtTicket extends CommonDBTM {
                'users_id'      => Session::getLoginUserID(),
             ];
 
-            if ($item->input['routetime_quantity']/60 != 0){
+            if ($quantity != 0){
                if ($rt_ticket->add($input)) { // ajout de ds valeur dans la bdd
 
                   $table = self::getTable();
@@ -579,18 +644,13 @@ class PluginRtTicket extends CommonDBTM {
             $icon = "<span class='badge text-wrap ms-1 d-none d-md-block' style='color:black'><i id='rt_faclock_{$task_id}' class='fa{$fa_icon}'></i> $total_route </span>";
          
             if ($Times > 0) { // affichage des éléments sous forme de badge en JS 
-               $script = <<<JAVASCRIPT
-                  $(document).ready(function() {
-                     $("div[data-itemtype='TicketTask'][data-items-id='{$task_id}'] div.card-body div.timeline-header div.creator").append("{$icon}");
-                  });
-               JAVASCRIPT;
-               echo Html::scriptBlock($script);
+               self::appendTaskBadgeScript((int)$task_id, $icon);
             }
          break;
       }  
          
       if(Session::haveRight("plugin_rt_add", CREATE)){
-         $ticketId = $_GET['id'];
+         $ticketId = (int)($_GET['id'] ?? 0);
          if(empty($ticketId)){
             echo'<div class="modal fade" id="AddUser" tabindex="-1" aria-labelledby="AddUserLabel" aria-hidden="true">';
             echo'<div class="modal-dialog">';
@@ -856,7 +916,7 @@ class PluginRtTicket extends CommonDBTM {
       global $DB, $EntitieAddress, $timerOn;
       
       // Affichage des infos de l'entité.
-      $ticketId   = $_GET['id'];
+      $ticketId   = (int)($_GET['id'] ?? 0);
       if($EntitieAddress == 0 && $ticketId != 0 && !empty($ticketId)){
          $EntitieAddress = 1;
 

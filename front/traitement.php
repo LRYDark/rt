@@ -12,24 +12,53 @@ $user      = new User();
 $usermail  = new UserEmail();
 $profile   = new Profile_User();
 
-function cleanString($str) {
-    $str = str_replace(' ', '', $str);
-    $str = strtolower($str);
-    $str = preg_replace('/[^a-z0-9]/', '', $str);
-    return 'JCD' . $str . '123$';
+function generateSecurePassword(int $length = 12): string {
+    $chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%';
+    $password = '';
+    for ($i = 0; $i < $length; $i++) {
+        $password .= $chars[random_int(0, strlen($chars) - 1)];
+    }
+    return $password;
+}
+
+if (!Session::getLoginUserID()) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => [],
+        'errors'  => ["Authentification requise"]
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if (!Session::haveRight('ticket', UPDATE)) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => [],
+        'errors'  => ["Droits insuffisants"]
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 // Champs requis
-if (empty($_GET['lastname']) || empty($_GET['firstname']) || empty($_GET['mail'])) {
-    $errors[] = "Les champs obligatoires ne peuvent pas être vides";
+$lastname = trim((string)($_GET['lastname'] ?? ''));
+$firstname = trim((string)($_GET['firstname'] ?? ''));
+$mail = trim((string)($_GET['mail'] ?? ''));
+$phone = trim((string)($_GET['phone'] ?? ''));
+$entity_id = (int)($_GET['entity_id'] ?? 0);
+$mailto = (($_GET['mailto'] ?? 'false') === 'true') ? 'true' : 'false';
+
+if ($entity_id > 0 && !Session::haveAccessToEntity($entity_id)) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => [],
+        'errors'  => ["Accès refusé à cette entité"]
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
-$lastname = $_GET['lastname'] ?? '';
-$firstname = $_GET['firstname'] ?? '';
-$mail = $_GET['mail'] ?? '';
-$phone = $_GET['phone'] ?? '';
-$entity_id = $_GET['entity_id'] ?? 0;
-$mailto = $_GET['mailto'] ?? 'false';
+if ($lastname === '' || $firstname === '' || $mail === '') {
+    $errors[] = "Les champs obligatoires ne peuvent pas être vides";
+}
 
 $username = strtolower($firstname . "." . $lastname);
 
@@ -37,7 +66,7 @@ if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
     $errors[] = "Format du mail incorrect";
 }
 
-$entities_query = $DB->doQuery("SELECT name FROM glpi_entities WHERE id = $entity_id");
+$entities_query = $DB->doQuery("SELECT name FROM glpi_entities WHERE id = " . (int)$entity_id);
 if (!$entities_query || $entities_query->num_rows == 0) {
     $errors[] = "Entité introuvable";
 }
@@ -52,7 +81,8 @@ if (!empty($errors)) {
 }
 
 $entities_name = $entities_query->fetch_object();
-$password = password_hash(cleanString($entities_name->name . $lastname), PASSWORD_DEFAULT);
+$cleanedPassword = generateSecurePassword();
+$password = password_hash($cleanedPassword, PASSWORD_DEFAULT);
 
 $InputUser = [
     'name'      => $username,
@@ -65,7 +95,7 @@ $InputUser = [
 if ($UserId = $user->add($InputUser)) {
     Event::log($UserId, "users", 4, "setup", sprintf(__('%1$s adds the item %2$s'), $_SESSION["glpiname"], $username));
 
-    $query = "UPDATE glpi_profiles_users SET entities_id = $entity_id, is_recursive = 1 WHERE users_id = $UserId";
+    $query = "UPDATE glpi_profiles_users SET entities_id = " . (int)$entity_id . ", is_recursive = 1 WHERE users_id = " . (int)$UserId;
     if (!$DB->doQuery($query)) {
         $errors[] = "Erreur lors de l'ajout de l'entité : " . $DB->error;
     }
@@ -78,7 +108,7 @@ if ($UserId = $user->add($InputUser)) {
     ];
 
     if ($usermail->add($InputUserMail)) {
-        $cleanedPassword = cleanString($entities_name->name . $lastname);
+        // $cleanedPassword est déjà défini plus haut (mot de passe généré aléatoirement)
 
         if ($mailto === "true") {
             global $DB, $CFG_GLPI;
@@ -131,7 +161,7 @@ if ($UserId = $user->add($InputUser)) {
 
                     // ORDER BY FIELD(language, curLang, short, '')
                     $order = new \QueryExpression(
-                        "FIELD(language,'" . implode("','", array_map('addslashes', $langs)) . "')"
+                        "FIELD(language,'" . implode("','", array_map(fn($l) => $DB->escape($l), $langs)) . "')"
                     );
 
                     $row = $DB->request([
@@ -246,7 +276,7 @@ if ($UserId = $user->add($InputUser)) {
         $errors[]  = "Erreur lors de l'ajout du mail du demandeur.";
         $user_info = [
             'user'     => $username,
-            'password' => cleanString($entities_name->name . $lastname)
+            'password' => $cleanedPassword
         ];
     }
 } else {

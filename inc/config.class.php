@@ -46,6 +46,9 @@ class PluginRtConfig extends CommonDBTM
       $config->getFromDB(1);
 
       $config->showFormHeader(['colspan' => 4]);
+      echo "<tr style='display:none'><td colspan='4'>";
+      echo Html::hidden('plugin_rt_csrf_token', ['value' => Session::getNewCSRFToken(true)]);
+      echo "</td></tr>";
       echo "<tr><th colspan='2'>" . __('Chronomètre', 'rp') . "</th></tr>";
 
       echo "<tr class='tab_bg_1'>";
@@ -119,7 +122,6 @@ class PluginRtConfig extends CommonDBTM
          echo "</td>";
       echo "</tr>";
 
-      $config->showFormHeader(['colspan' => 4]);
       echo "<tr><th colspan='2'>" . __('Configuration mail', 'rp') . "</th></tr>";
 
       echo "<tr class='tab_bg_1'>";
@@ -542,7 +544,7 @@ class PluginRtConfig extends CommonDBTM
 
       $ID = $DB->doQuery("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'")->fetch_object();
 
-      $query= "UPDATE glpi_plugin_rt_configs SET gabarit = $ID->id WHERE id=1;";
+      $query= "UPDATE glpi_plugin_rt_configs SET gabarit = " . (int)$ID->id . " WHERE id=1;";
       $DB->doQuery($query) or die($DB->error());
 
       if ($_SESSION['PLUGIN_RT_VERSION'] > '1.5.3'){

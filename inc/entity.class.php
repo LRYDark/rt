@@ -55,30 +55,29 @@ class PluginRtEntity extends CommonDBTM
         global $DB;
 
         $ticketId = (int)$ticket->getField('id');
+        $totals = $DB->doQuery(
+            "SELECT
+                (SELECT SUM(actiontime) FROM glpi_tickettasks WHERE tickets_id = $ticketId) AS TotalTask,
+                (SELECT SUM(routetime) FROM glpi_plugin_rt_tickets WHERE tickets_id = $ticketId) AS TotalTrajet"
+        )->fetch_object();
 
-        // ----- Total tâches (en secondes -> minutes) -----
-        $result_total_task = $DB->doQuery("SELECT SUM(actiontime) as TotalTask FROM glpi_tickettasks WHERE tickets_id = $ticketId")->fetch_object();
-        if (!empty($result_total_task->TotalTask)) {
-            $result_total_min_task = (int) ($result_total_task->TotalTask / 60);
-            $h = (int) floor($result_total_min_task / 60);
-            $m = $result_total_min_task % 60;
-            $result_total_hour_task = $h . 'h' . str_pad($m, 2, '0', STR_PAD_LEFT);
-            $result_total_task_label = $result_total_hour_task . ' | ' . $result_total_min_task . ' min';
-        } else {
-            $result_total_task_label = 'Aucune durée';
-        }
+        $formatMinutesLabel = static function (?int $minutes): string {
+            $minutes = (int) ($minutes ?? 0);
+            if ($minutes <= 0) {
+                return 'Aucune durée';
+            }
+            $h = (int) floor($minutes / 60);
+            $m = $minutes % 60;
+            return $h . 'h' . str_pad((string)$m, 2, '0', STR_PAD_LEFT) . ' | ' . $minutes . ' min';
+        };
+
+        // ----- Total tâches (actiontime en secondes -> minutes) -----
+        $result_total_min_task = !empty($totals->TotalTask) ? (int) (((int)$totals->TotalTask) / 60) : 0;
+        $result_total_task_label = $formatMinutesLabel($result_total_min_task);
 
         // ----- Total trajets (déjà en minutes) -----
-        $result_total_trajet = $DB->doQuery("SELECT SUM(routetime) as TotalTrajet FROM glpi_plugin_rt_tickets WHERE tickets_id = $ticketId")->fetch_object();
-        if (!empty($result_total_trajet->TotalTrajet)) {
-            $result_total_min_trajet = (int) $result_total_trajet->TotalTrajet;
-            $h = (int) floor($result_total_min_trajet / 60);
-            $m = $result_total_min_trajet % 60;
-            $result_total_hour_trajet = $h . 'h' . str_pad($m, 2, '0', STR_PAD_LEFT);
-            $result_total_trajet_label = $result_total_hour_trajet . ' | ' . $result_total_min_trajet . ' min';
-        } else {
-            $result_total_trajet_label = 'Aucune durée';
-        }
+        $result_total_min_trajet = !empty($totals->TotalTrajet) ? (int) $totals->TotalTrajet : 0;
+        $result_total_trajet_label = $formatMinutesLabel($result_total_min_trajet);
 
         // ----- Tableau identique à ton rendu -----
         $tableau = "<table class='table table-bordered'><thead><tr>"

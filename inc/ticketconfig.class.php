@@ -42,7 +42,18 @@ class PluginRtTicketConfig extends CommonDBTM
             $table = self::getTable();
 
             if (!$ticket->isNewItem() && $DB->tableExists($table)) {
-                $ticket_config->getFromDBByCrit(["tickets_id" => $ticket->getID()]);
+                $row = $DB->request([
+                    'SELECT' => ['id'],
+                    'FROM'   => $table,
+                    'WHERE'  => ['tickets_id' => $ticket->getID()],
+                    'ORDER'  => ['id ASC'],
+                    'LIMIT'  => 1,
+                ])->current();
+                if (!empty($row['id'])) {
+                    $ticket_config->getFromDB((int)$row['id']);
+                } else {
+                    $ticket_config->getEmpty();
+                }
             } else {
                 $ticket_config->getEmpty();
             }

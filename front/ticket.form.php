@@ -11,12 +11,12 @@ $ticket = new Ticket();
 $input = [
     'tickets_id'                => $ticket->getID(),
     'entities_id'               => $ticket->getEntityID(),
-    'routetime'                 => $_REQUEST['routetime_quantity'],
+    'routetime'                 => (int)($_REQUEST['routetime_quantity'] ?? 0),
     'users_id'                  => Session::getLoginUserID(),
 ];
 if ($PluginRtTicket->add($input)) {
     Session::addMessageAfterRedirect(
-        __('Temps de trajet ajouté : ' . $item->input['routetime_quantity']/60 . ' Minute(s)', 'rt'),
+        __('Temps de trajet ajouté : ' . ((int)$input['routetime'] / 60) . ' Minute(s)', 'rt'),
         true,
         INFO
     );
