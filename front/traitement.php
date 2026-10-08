@@ -213,11 +213,7 @@ if ($UserId = $user->add($InputUser)) {
                         $footerVal = html_entity_decode((string)$cfgRow['value'], ENT_QUOTES, 'UTF-8');
                     }
 
-                    // --- Construction e-mail (GLPIMailer / Symfony Mailer) ---
-                    $mmail = new GLPIMailer();
-                    $mmail->addCustomHeader("X-Auto-Response-Suppress: OOF, DR, NDR, RN, NRN");
-
-                    // From sécurisé (fallback)
+                    // --- Construction e-mail : file d'attente des notifications de GLPI, envoi immédiat ---
                     $fromEmail = !empty($CFG_GLPI['from_email'])
                         ? (string)$CFG_GLPI['from_email']
                         : (!empty($CFG_GLPI['admin_email']) ? (string)$CFG_GLPI['admin_email'] : 'no-reply@localhost');
@@ -225,19 +221,11 @@ if ($UserId = $user->add($InputUser)) {
                     $fromName = $CFG_GLPI['from_email_name'] ?? $CFG_GLPI['admin_email_name'] ?? null;
                     $fromName = (is_string($fromName) && $fromName !== '') ? $fromName : 'GLPI';
 
-                    $emailObj = $mmail->getEmail();
-                    $emailObj->from(new \Symfony\Component\Mime\Address($fromEmail, $fromName));
-                    $emailObj->to($mail); // pas de "name" pour éviter null
-
                     // Sujet / Corps avec balises + normalisation EOL
                     $Subject   = is_string($Subject)  ? $Subject  : '';
                     $BodyHtml  = is_string($BodyHtml) ? $BodyHtml : '';
                     $BodyText  = is_string($BodyText) ? $BodyText : '';
                     $footerStr = is_string($footerVal) ? $footerVal : '';
-
-                    if ($Subject !== '') {
-                        $mmail->Subject = balise($Subject, $Balises);
-                    }
 
                     $html = normalize_eols(balise($BodyHtml, $Balises));
                     $txt  = normalize_eols(balise($BodyText, $Balises));
@@ -247,19 +235,30 @@ if ($UserId = $user->add($InputUser)) {
                         $txt  .= "\r\n" . strip_tags($footerStr);
                     }
 
-                    $mmail->Body    = $html;
-                    $mmail->AltBody = $txt;
+                    // Envoi immédiat par la file : la réponse à l'écran reste immédiate ; en cas d'échec, le mail reste
+                    // en file et GLPI le renvoie (tâche « queuednotification »). Il contient le mot de passe : il reste
+                    // dans la table de la file jusqu'à son nettoyage par GLPI.
+                    $result = PluginRtMailqueue::send([
+                        'itemtype'    => User::class,
+                        'items_id'    => (int) $UserId,
+                        'entities_id' => (int) $entity_id,
+                        'event'       => 'plugin_rt_newuser',
+                        'subject'     => $Subject !== '' ? balise($Subject, $Balises) : '',
+                        'text'        => $txt,
+                        'html'        => $html,
+                        'to'          => [[$mail, '']],
+                        'from'        => [$fromEmail, $fromName],
+                    ], true);
 
-                    // Envoi
-                    if ($mmail->send()) {
+                    if ($result['sent'] > 0) {
                         $success[] = "Demandeur ajouté avec succès, informations envoyées par e-mail à : $mail";
+                    } elseif ($result['queued'] > 0) {
+                        $success[] = "Demandeur ajouté avec succès";
+                        $errors[]  = "Le mail à $mail n'est pas encore parti (" . implode(' ; ', array_unique($result['errors'])) . ") : il reste en file d'attente et GLPI le renverra automatiquement.";
                     } else {
                         $success[] = "Demandeur ajouté avec succès";
                         $errors[]  = "Erreur lors de l'envoi du mail à : $mail";
                     }
-
-                    // Nettoyage
-                    $mmail->ClearAddresses();
                 }
             }
         } else {
