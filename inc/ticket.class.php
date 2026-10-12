@@ -7,7 +7,7 @@ if (!defined('GLPI_ROOT')) {
 //------------------------------------------------------------------------------------------
 class PluginRtTicket extends CommonDBTM {
 
-   public static $rightname = 'ticket';
+   public static string $rightname = 'ticket';
    public  static  $EntitieAddress = 0 ;
    private static $taskBadgeScriptHelperLoaded = false;
 
@@ -277,7 +277,7 @@ class PluginRtTicket extends CommonDBTM {
                $out .= "</td>";
 
                $out .= "<td class='center'>";
-               $out .= getUserName($data["users_id"], $showuserlink);
+               $out .= getUserName((int)$data["users_id"], $showuserlink);
                $out .= "</td>";
                $out .= "<td class='center'>";
                //$out .= $data['routetime'] . ' Minute(s)';
@@ -981,7 +981,6 @@ class PluginRtTicket extends CommonDBTM {
                      "<a href='ticket.php?is_deleted=0&as_map=0&browse=0" .
                      "&criteria[0][link]=AND&criteria[0][field]=80&criteria[0][searchtype]=equals" .
                      "&criteria[0][value]=$result->id&itemtype=Ticket&start=0" .
-                     "&_glpi_csrf_token=9c400ceeba45c9c3e88bb3587d75bf6ec81ca5a774ce761aa6b71e3a84db751c" .
                      "&sort[]=19&order[]=DESC' style='display:block; flex:1 1 auto; min-width:0; white-space:normal;'>" .
                      htmlspecialchars(preg_replace('/<br\s*\/?>/i', ', ', $complement . $address), ENT_QUOTES, 'UTF-8') .
                      "</a>" .

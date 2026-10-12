@@ -3,7 +3,7 @@ use Glpi\Application\View\TemplateRenderer;
 
 class PluginRtTicketConfig extends CommonDBTM
 {
-    public static $rightname = 'plugin_rt_ticketconfig';
+    public static string $rightname = 'plugin_rt_ticketconfig';
 
     const TICKET_TAB  = 1024;
     const TICKET_FORM = 2048;

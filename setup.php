@@ -1,19 +1,18 @@
 <?php
-define('PLUGIN_RT_VERSION', '1.6.3'); // version du plugin
+define('PLUGIN_RT_VERSION', '1.7.0'); // version du plugin
 $_SESSION['PLUGIN_RT_VERSION'] = PLUGIN_RT_VERSION;
 
 // Minimal GLPI version,
-define("PLUGIN_RT_MIN_GLPI", "10.0.3");
+define("PLUGIN_RT_MIN_GLPI", "12.0.0");
 // Maximum GLPI version,
-define("PLUGIN_RT_MAX_GLPI", "11.2.0");
+define("PLUGIN_RT_MAX_GLPI", "12.0.99");
 
-define("PLUGIN_RT_WEBDIR", Plugin::getWebDir("rt"));
+define("PLUGIN_RT_WEBDIR", ($GLOBALS['CFG_GLPI']['root_doc'] ?? '') . '/plugins/rt');
 define("PLUGIN_RT_DIR", Plugin::getPhpDir("rt"));
 
 function plugin_init_rt() { // fonction glpi d'initialisation du plugin
    global $PLUGIN_HOOKS, $CFG_GLPI;
 
-   $PLUGIN_HOOKS['csrf_compliant']['rt'] = true;
    $PLUGIN_HOOKS['change_profile']['rt'] = ['PluginRtProfile', 'initProfile'];
 
    $plugin = new Plugin();

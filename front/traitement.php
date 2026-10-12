@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-include("../../../inc/includes.php");
 use Glpi\Event;
 
 $errors = [];
@@ -160,7 +159,7 @@ if ($UserId = $user->add($InputUser)) {
                     $langs   = array_values(array_unique([$curLang, substr($curLang, 0, 2), '']));
 
                     // ORDER BY FIELD(language, curLang, short, '')
-                    $order = new \QueryExpression(
+                    $order = new \Glpi\DBAL\QueryExpression(
                         "FIELD(language,'" . implode("','", array_map(fn($l) => $DB->escape($l), $langs)) . "')"
                     );
 

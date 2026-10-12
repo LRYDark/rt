@@ -46,9 +46,6 @@ class PluginRtConfig extends CommonDBTM
       $config->getFromDB(1);
 
       $config->showFormHeader(['colspan' => 4]);
-      echo "<tr style='display:none'><td colspan='4'>";
-      echo Html::hidden('plugin_rt_csrf_token', ['value' => Session::getNewCSRFToken(true)]);
-      echo "</td></tr>";
       echo "<tr><th colspan='2'>" . __('Chronomètre', 'rp') . "</th></tr>";
 
       echo "<tr class='tab_bg_1'>";
@@ -528,7 +525,7 @@ class PluginRtConfig extends CommonDBTM
          &#60;/div&#62;
       ';
       // Échapper le contenu HTML
-      $content_html_escaped = Toolbox::addslashes_deep($content_html);
+      $content_html_escaped = $DB->escape(str_replace(['&#039;', '&#39;', '&#x27;', '&apos;', '&quot;'], ["'", "'", "'", "'", '"'], $content_html));
 
       // Construire la requête d'insertion
       $insertQuery1 = "INSERT INTO `glpi_notificationtemplates` (`name`, `itemtype`, `date_mod`, `comment`, `css`, `date_creation`) VALUES ('RT Ajout Demandeur', 'Ticket', NULL, 'Created by the plugin RT', '', NULL);";

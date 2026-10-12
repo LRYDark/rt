@@ -1,7 +1,6 @@
 <?php
 use Glpi\Event;
 
-include ('../../../inc/includes.php');
 
 Session::haveRight("ticket", UPDATE);
 
@@ -23,4 +22,4 @@ if ($PluginRtTicket->add($input)) {
     Html::back();
 }
 
-Html::displayErrorAndDie("lost");
+throw new \Glpi\Exception\Http\BadRequestHttpException("lost");
