@@ -547,7 +547,7 @@ class PluginRtConfig extends CommonDBTM
       $query= "UPDATE glpi_plugin_rt_configs SET gabarit = " . (int)$ID->id . " WHERE id=1;";
       $DB->doQuery($query) or die($DB->error());
 
-      if ($_SESSION['PLUGIN_RT_VERSION'] > '1.5.3'){
+      if (version_compare(PLUGIN_RT_VERSION, '1.5.3', '>')){
          // Vérifier si les colonnes existent déjà
          $columns = $DB->doQuery("SHOW COLUMNS FROM `$table`")->fetch_all(MYSQLI_ASSOC);
 
