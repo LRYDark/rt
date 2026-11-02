@@ -14,6 +14,10 @@
   rust-clippy) : sans configuration ni secrets, ils échouaient chaque semaine. Remplacés par la CI.
 - CI GitHub : syntaxe sur PHP 8.3 à 8.5, installation réelle dans GLPI 12.0.1, chargement de chaque classe,
   parcours des pages et de leurs onglets.
+- **Réglages remis à zéro à chaque mise à jour** : l'installation supprimait puis recréait la table de
+  configuration (couleurs et options du chrono, gabarit, clé ORS) et le gabarit « RT Ajout Demandeur ». La table et
+  le gabarit sont conservés : seules les colonnes manquantes sont ajoutées, et le gabarit n'est rattaché à la
+  configuration que si aucun gabarit valable n'y est choisi.
 
 ## 1.7.0 — 2026-10-12
 
