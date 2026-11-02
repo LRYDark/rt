@@ -238,10 +238,11 @@ class PluginRtConfig extends CommonDBTM
 
       $table = self::getTable();
       $config = new self();
-      if ($DB->tableExists($table)) {
-         $query = "DROP TABLE $table";
-         $DB->doQuery($query) or die($DB->error());
-      }
+      /*
+       * La table n'est créée qu'à la première installation. Elle était supprimée puis recréée à chaque
+       * installation, donc à chaque mise à jour : tous les réglages repartaient à leurs valeurs par défaut,
+       * clé ORS comprise.
+       */
       if (!$DB->tableExists($table)) {
 
          $migration->displayMessage("Installing $table");
@@ -269,7 +270,17 @@ class PluginRtConfig extends CommonDBTM
          $migration->displayMessage("Updating $table");
 
          // Ajouter les nouvelles colonnes si elles n'existent pas
+         // Toutes les colonnes, y compris celles du CREATE TABLE : la table n'est plus recréée,
+         // une installation ancienne doit les recevoir une à une.
          $fieldsToAdd = [
+            'showtimer' => "TINYINT NOT NULL DEFAULT '1'",
+            'showColorTimer' => "VARCHAR(255) NOT NULL DEFAULT '#000000'",
+            'showBackgroundTimer' => "VARCHAR(255) NOT NULL DEFAULT '#fec95c'",
+            'showcolorbutton' => "TINYINT NOT NULL DEFAULT '0'",
+            'showactivatetimer' => "TINYINT NOT NULL DEFAULT '1'",
+            'showPlayPauseButton' => "TINYINT NOT NULL DEFAULT '1'",
+            'fromonglettrajet' => "TINYINT NOT NULL DEFAULT '1'",
+            'showtime' => "TINYINT NOT NULL DEFAULT '1'",
             'gabarit' => "INT(10) NOT NULL DEFAULT '0'",
             'mail' => "TINYINT NOT NULL DEFAULT '0'",
          ];
@@ -282,22 +293,23 @@ class PluginRtConfig extends CommonDBTM
          }
       }
 
-      $result = $DB->doQuery("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'");
+      /*
+       * Gabarit « RT Ajout Demandeur » : créé une seule fois. Il était supprimé puis recréé à chaque mise à jour,
+       * sous un nouvel identifiant : ses modifications étaient perdues et le gabarit choisi dans la configuration
+       * ne désignait plus rien.
+       */
+      $rt_template_criteria = [
+         'SELECT' => ['id'],
+         'FROM'   => 'glpi_notificationtemplates',
+         'WHERE'  => ['name' => 'RT Ajout Demandeur', 'comment' => 'Created by the plugin RT'],
+         'ORDER'  => 'id ASC',
+         'LIMIT'  => 1,
+      ];
+      $rt_template = $DB->request($rt_template_criteria)->current();
 
-      while ($ID = $result->fetch_object()) {
-          if (!empty($ID->id)) {
-              // Suppression de la ligne dans glpi_notificationtemplates
-              $deleteTemplateQuery = "DELETE FROM glpi_notificationtemplates WHERE id = {$ID->id}";
-              $DB->doQuery($deleteTemplateQuery);
-      
-              // Suppression de la ligne correspondante dans glpi_notificationtemplatetranslations
-              $deleteTranslationQuery = "DELETE FROM glpi_notificationtemplatetranslations WHERE notificationtemplates_id = {$ID->id}";
-              $DB->doQuery($deleteTranslationQuery);
-          }
-      }
-
-      // Préparer le contenu HTML
-      $content_html = '
+      if (!is_array($rt_template)) {
+         // Préparer le contenu HTML
+         $content_html = '
          &#60;div class="es-wrapper-color" dir="ltr" lang="fr" style="background-color: #f6f6f6;"&#62;
          &#60;table class="es-wrapper" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; padding: 0; margin: 0; width: 100%; height: 100%; background-repeat: repeat; background-position: center top; background-color: #f6f6f6;" role="none" width="100%" cellspacing="0" cellpadding="0"&#62;
          &#60;tbody&#62;
@@ -527,25 +539,33 @@ class PluginRtConfig extends CommonDBTM
          &#60;/table&#62;
          &#60;/div&#62;
       ';
-      // Échapper le contenu HTML
-      $content_html_escaped = Toolbox::addslashes_deep($content_html);
+         // Échapper le contenu HTML
+         $content_html_escaped = Toolbox::addslashes_deep($content_html);
 
-      // Construire la requête d'insertion
-      $insertQuery1 = "INSERT INTO `glpi_notificationtemplates` (`name`, `itemtype`, `date_mod`, `comment`, `css`, `date_creation`) VALUES ('RT Ajout Demandeur', 'Ticket', NULL, 'Created by the plugin RT', '', NULL);";
-      // Exécuter la requête
-      $DB->doQuery($insertQuery1);
+         // Construire la requête d'insertion
+         $insertQuery1 = "INSERT INTO `glpi_notificationtemplates` (`name`, `itemtype`, `date_mod`, `comment`, `css`, `date_creation`) VALUES ('RT Ajout Demandeur', 'Ticket', NULL, 'Created by the plugin RT', '', NULL);";
+         // Exécuter la requête
+         $DB->doQuery($insertQuery1);
 
-      // Construire la requête d'insertion
-      $insertQuery2 = "INSERT INTO `glpi_notificationtemplatetranslations` 
-         (`notificationtemplates_id`, `language`, `subject`, `content_text`, `content_html`) 
-         VALUES (LAST_INSERT_ID(), 'fr_FR', '[GLPI] | Vos informations de connexion JCD', '', '{$content_html_escaped}')";
-      // Exécuter la requête
-      $DB->doQuery($insertQuery2);
+         // Construire la requête d'insertion
+         $insertQuery2 = "INSERT INTO `glpi_notificationtemplatetranslations` 
+            (`notificationtemplates_id`, `language`, `subject`, `content_text`, `content_html`) 
+            VALUES (LAST_INSERT_ID(), 'fr_FR', '[GLPI] | Vos informations de connexion JCD', '', '{$content_html_escaped}')";
+         // Exécuter la requête
+         $DB->doQuery($insertQuery2);
 
-      $ID = $DB->doQuery("SELECT id FROM glpi_notificationtemplates WHERE NAME = 'RT Ajout Demandeur' AND comment = 'Created by the plugin RT'")->fetch_object();
+         $rt_template = $DB->request($rt_template_criteria)->current();
+      }
 
-      $query= "UPDATE glpi_plugin_rt_configs SET gabarit = " . (int)$ID->id . " WHERE id=1;";
-      $DB->doQuery($query) or die($DB->error());
+      // Gabarit de la configuration : posé seulement s'il n'y en a pas, ou s'il désigne un gabarit disparu.
+      $rt_config = $DB->request(['SELECT' => ['gabarit'], 'FROM' => $table, 'WHERE' => ['id' => 1]])->current();
+      $rt_current = (int)($rt_config['gabarit'] ?? 0);
+      if (
+         is_array($rt_template)
+         && ($rt_current <= 0 || countElementsInTable('glpi_notificationtemplates', ['id' => $rt_current]) === 0)
+      ) {
+         $DB->update($table, ['gabarit' => (int)$rt_template['id']], ['id' => 1]);
+      }
 
       if (version_compare(PLUGIN_RT_VERSION, '1.5.3', '>')){
          // Vérifier si les colonnes existent déjà
